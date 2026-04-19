@@ -1,0 +1,54 @@
+# Music intensity and pacing curves for video composition
+
+# BGM volume curve relative to video progress (0.0 = start, 1.0 = end)
+# Values are dB offsets from base BGM level (-18dB)
+bgm_intensity:
+  default:
+    - position: 0.0
+      db_offset: -6    # Very quiet at start (let hook narration be clear)
+    - position: 0.05
+      db_offset: -3    # Gradually increase
+    - position: 0.15
+      db_offset: 0     # Normal level during conflict
+    - position: 0.45
+      db_offset: 0     # Steady during layering
+    - position: 0.50
+      db_offset: -12   # Drop before reveal
+    - position: 0.55
+      db_offset: 3     # Emotional reversal - music swells
+    - position: 0.70
+      db_offset: 6     # Peak at climax
+    - position: 0.75
+      db_offset: -6    # Sudden drop after climax
+    - position: 0.85
+      db_offset: 0     # Return to normal for healing
+    - position: 0.95
+      db_offset: -3    # Fade for CTA
+    - position: 1.0
+      db_offset: -12   # Fade out
+
+# Narration pacing (speaking rate multiplier)
+narration_pacing:
+  hook: 0.92        # Slightly slower for dramatic effect
+  conflict: 0.95    # Near-normal pace
+  layering: 0.88    # Slow, contemplative
+  reveal: 0.83      # Very slow for impact
+  climax: 0.78      # Slowest - let words sink in
+  healing: 0.88     # Gentle pace
+  afterglow: 0.85   # Slow, peaceful
+
+# Silence duration before emotional moments (seconds)
+silence_before:
+  reveal: 1.5       # Brief pause before truth
+  climax: 2.5       # Long pause for maximum impact
+  healing: 1.0      # Short breath before resolution
+
+# Ken Burns zoom curve per phase
+zoom_intensity:
+  hook: 1.15        # Subtle zoom in
+  conflict: 1.1     # Minimal movement
+  layering: 1.2     # Slow zoom for nostalgia
+  reveal: 1.0       # Static - focus on content
+  climax: 1.3       # Most dramatic zoom
+  healing: 1.1      # Gentle pull back
+  afterglow: 1.05   # Almost static

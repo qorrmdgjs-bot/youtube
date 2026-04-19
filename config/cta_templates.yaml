@@ -1,0 +1,83 @@
+# CTA (Call to Action) Templates - optimized for Korean senior audience
+
+# Context-specific comment CTAs (mapped by emotion)
+comment_cta:
+  default:
+    - "여러분의 가족 이야기를 댓글로 들려주세요 💬"
+    - "부모님께 마지막으로 '사랑해요'라고 말한 게 언제인가요? 댓글로 남겨주세요."
+  parent_sacrifice:
+    - "아버지가 나를 위해 해주셨던 것, 하나만 댓글로 적어주세요 🙏"
+    - "부모님의 희생을 뒤늦게 깨달은 순간이 있으신가요?"
+  sibling:
+    - "오랫동안 연락 못한 형제자매가 있으신가요? 💔"
+    - "형제와 화해한 경험을 나눠주세요."
+  grandparent:
+    - "할머니가 해주셨던 음식 중 가장 그리운 건 뭔가요? 🍚"
+    - "할머니를 떠올리면 가장 먼저 생각나는 것을 댓글로 남겨주세요."
+
+subscribe_cta:
+  - "매주 따뜻한 가족 이야기를 전해드립니다 ❤️ 구독과 알림 설정 부탁드려요."
+  - "다음 이야기가 궁금하시다면, 구독 버튼을 눌러주세요 🔔"
+
+# Engagement boosters
+engagement_cta:
+  - "공감되셨다면 좋아요 👍 한 번만 부탁드립니다."
+  - "이 이야기가 마음에 와닿으셨다면 주변 분들과 공유해주세요 💕"
+
+story_submission_cta:
+  - "📮 여러분의 사연을 보내주세요. 영상으로 만들어 드립니다."
+  - "📮 우리 채널에서 여러분의 이야기를 들려주고 싶으시다면 사연을 보내주세요."
+
+# Membership tiers
+membership_cta:
+  tier1:
+    name: "가족 응원단"
+    price: "$1.99"
+    benefit: "매주 특별한 가족 이야기를 먼저 만나보세요"
+  tier2:
+    name: "이야기 후원자"
+    price: "$4.99"
+    benefit: "비하인드 사연 + 월간 감동 편지 전달"
+  tier3:
+    name: "가족 지킴이"
+    price: "$9.99"
+    benefit: "사연 우선 제작 + 맞춤 가족 영상 요청"
+  cta_text:
+    - "⭐ 채널 멤버십으로 더 많은 가족 이야기를 만나보세요."
+
+kakao_cta:
+  - "💬 카카오톡 오픈채팅방에서 따뜻한 가족 이야기를 함께 나눠요."
+
+# Affiliate - pivoted to high-conversion products for seniors
+affiliate:
+  photo_album:
+    text: "📸 소중한 가족 추억을 사진앨범으로 남겨보세요"
+    description: "지금 주문하시면 10% 할인"
+    url_placeholder: "{{PHOTO_ALBUM_AFFILIATE_URL}}"
+    conversion_rate: "10%"
+  health_supplement:
+    text: "💊 부모님 건강을 위한 프리미엄 건강 보조식품"
+    description: "관절·혈압·면역력 관리"
+    url_placeholder: "{{HEALTH_SUPPLEMENT_URL}}"
+    conversion_rate: "8%"
+  ancestry:
+    text: "🌳 우리 가족의 뿌리를 찾아보세요 - 가계도 서비스"
+    description: "3대 이상 가계도 복원"
+    url_placeholder: "{{ANCESTRY_URL}}"
+    conversion_rate: "5%"
+  family_app:
+    text: "📱 가족끼리 사진·영상 공유하는 가족 전용 앱"
+    description: "무료 체험 가능"
+    url_placeholder: "{{FAMILY_APP_URL}}"
+    conversion_rate: "7%"
+
+# CPA - pivoted away from insurance/funeral to better-converting products
+cpa:
+  photo_book:
+    text: "📖 부모님 인생 스토리북 제작 서비스"
+    disclaimer: "※ 제휴 링크이며, 이용 시 채널 운영에 도움이 됩니다."
+    url_placeholder: "{{STORYBOOK_CPA_URL}}"
+  senior_phone:
+    text: "📞 부모님을 위한 쉬운 스마트폰 설정 서비스"
+    disclaimer: "※ 제휴 링크이며, 이용 시 채널 운영에 도움이 됩니다."
+    url_placeholder: "{{SENIOR_PHONE_CPA_URL}}"

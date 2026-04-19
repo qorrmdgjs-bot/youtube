@@ -1,0 +1,48 @@
+[project]
+name = "youtube-automation"
+version = "0.1.0"
+description = "Automated long-form YouTube content pipeline for Korean senior audience"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.39.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "typer>=0.12.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    "python-dotenv>=1.0",
+    "structlog>=24.0",
+    "pillow>=10.0",
+    "requests>=2.31",
+    "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5.0",
+]
+tts = [
+    "google-cloud-texttospeech>=2.16",
+]
+image = [
+    "replicate>=0.25",
+]
+whisper = [
+    "openai-whisper>=20231117",
+]
+
+[project.scripts]
+yt = "src.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,34 @@
+# Monetization description block templates
+
+# Separator line
+separator: "─────────────────────────────"
+
+# Block order in YouTube description
+block_order:
+  - "story_summary"
+  - "timestamps"
+  - "separator"
+  - "subscribe_cta"
+  - "comment_cta"
+  - "separator"
+  - "affiliate"
+  - "cpa"
+  - "separator"
+  - "membership"
+  - "story_submission"
+  - "kakao"
+  - "separator"
+  - "hashtags"
+
+# Default hashtags
+hashtags:
+  - "#가족이야기"
+  - "#감동실화"
+  - "#부모님사랑"
+  - "#효도"
+  - "#가족"
+  - "#눈물"
+  - "#시니어"
+  - "#인생이야기"
+  - "#부모"
+  - "#감사"

@@ -1,0 +1,44 @@
+# Safety and Quality Rules
+
+# Banned phrases - content must not contain these
+banned_phrases:
+  medical_claims:
+    - "이 방법으로 치료"
+    - "의사도 놀란"
+    - "기적의 치료"
+    - "약 없이 완치"
+    - "건강보험 사기"
+  insensitive_death:
+    - "죽어 마땅"
+    - "빨리 죽었으면"
+    - "죽는 게 나았"
+    - "자살"
+    - "극단적 선택을 권"
+  manipulative:
+    - "이걸 안 보면 후회"
+    - "지금 당장 안 하면"
+    - "99%가 모르는"
+    - "충격적 반전"
+
+# Pacing limits
+pacing:
+  max_subtitle_syllables_per_sec: 3.5
+  min_scene_duration_sec: 3.0
+  max_scene_duration_sec: 45.0
+  min_silence_gap_sec: 0.3
+  max_consecutive_similar_emotions: 3
+
+# Dedup thresholds
+dedup:
+  script_cosine_similarity_threshold: 0.85
+  image_perceptual_hash_threshold: 10  # hamming distance
+  recent_projects_to_check: 50
+  bgm_reuse_cooldown_videos: 5
+
+# Content quality
+quality:
+  min_scenes_per_video: 5
+  max_scenes_per_video: 12
+  min_total_narration_sec: 180
+  max_total_narration_sec: 420
+  required_cta_types: ["comment", "subscribe"]

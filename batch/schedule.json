@@ -1,0 +1,12 @@
+{
+  "description": "배치 큐 템플릿 - queue.json에 브리프를 추가하면 batch 명령으로 일괄 처리",
+  "example_brief": {
+    "title": "아버지의 낡은 도시락",
+    "synopsis": "매일 새벽 도시락을 싸던 아버지, 그 도시락 안에 숨겨진 편지를 30년 만에 발견한 딸의 이야기",
+    "family_type": "parent_sacrifice",
+    "emotional_arc": "parent_sacrifice",
+    "ending_type": "healing",
+    "target_duration_sec": 300,
+    "voice_gender": "female"
+  }
+}

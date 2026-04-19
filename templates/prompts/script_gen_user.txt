@@ -1,0 +1,37 @@
+다음 정보를 바탕으로 감성 가족 이야기 영상 스크립트를 작성해주세요.
+
+## 영상 정보
+- 제목: {{ title }}
+- 줄거리: {{ synopsis }}
+- 가족 유형: {{ family_type }}
+- 감정 아크: {{ emotional_arc }}
+- 엔딩 유형: {{ ending_type }}
+- 목표 길이: {{ target_duration_sec }}초 (약 {{ (target_duration_sec / 60) | round(1) }}분)
+{% if custom_keywords %}
+- 키워드: {{ custom_keywords | join(', ') }}
+{% endif %}
+
+## 감정 아크 상세
+{% for phase in arc_structure %}
+### {{ phase.phase }} ({{ phase.time_range[0] }}-{{ phase.time_range[1] }}초)
+- 감정: {{ phase.emotion }}
+- 지침: {{ phase.instruction }}
+{% endfor %}
+
+## 추가 지침
+{% if ending_type == "healing" %}
+- 마지막은 반드시 따뜻한 화해와 치유로 끝내주세요
+{% elif ending_type == "bittersweet" %}
+- 마지막은 아쉬움과 감사가 공존하는 씁쓸달콤한 감정으로 끝내주세요
+{% elif ending_type == "hopeful" %}
+- 마지막은 미래에 대한 희망과 새로운 시작의 메시지로 끝내주세요
+{% elif ending_type == "cathartic" %}
+- 마지막은 오랫동안 참았던 감정이 해소되는 카타르시스로 끝내주세요
+{% endif %}
+
+- 장면 수: 6-10개
+- 각 장면의 duration_sec 합이 {{ target_duration_sec }}초에 가깝게 맞춰주세요
+- 내레이션은 시니어가 편하게 들을 수 있는 느린 속도를 고려해 텍스트 양을 조절하세요
+- visual_description은 이미지 생성에 사용되므로 구체적인 시각 장면을 묘사해주세요
+
+JSON 형식으로만 응답해주세요.

@@ -1,0 +1,379 @@
+# Emotional Arc Templates
+# Each arc defines the emotional structure for a 4-6 minute family story
+
+arcs:
+  parent_sacrifice:
+    name: "부모의 희생"
+    description: "자식을 위해 모든 것을 바친 부모의 숨겨진 사랑 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "curiosity_sadness"
+        instruction: "자녀가 뒤늦게 발견한 부모의 흔적으로 시작. '그날 아버지의 낡은 서랍을 열었을 때...' 식의 도입"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "tension"
+        instruction: "부모와의 갈등이나 오해 상황 설정. 자녀가 부모를 이해하지 못했던 시절"
+      - phase: "layering"
+        time_range: [45, 120]
+        emotion: "nostalgia_sadness"
+        instruction: "과거 기억을 겹겹이 쌓기. 부모의 작은 행동들이 사실은 희생이었음을 하나씩 드러내기"
+      - phase: "reveal"
+        time_range: [120, 180]
+        emotion: "shock_realization"
+        instruction: "숨겨진 진실 공개. 부모가 말하지 않았던 고통이나 선택의 이유"
+      - phase: "climax"
+        time_range: [180, 240]
+        emotion: "deep_sadness_gratitude"
+        instruction: "감정 폭발. 자녀의 후회와 감사가 동시에 터지는 순간"
+      - phase: "healing"
+        time_range: [240, 300]
+        emotion: "warmth_peace"
+        instruction: "화해와 치유. 늦었지만 전하는 사랑의 말"
+      - phase: "afterglow"
+        time_range: [300, 360]
+        emotion: "gentle_hope"
+        instruction: "여운. 시청자에게 '오늘 부모님께 전화 한 통' 메시지"
+    keywords: ["희생", "서랍", "편지", "도시락", "새벽", "병원", "용돈"]
+
+  sibling_reconciliation:
+    name: "형제 화해"
+    description: "오랜 갈등 끝에 다시 만나는 형제자매 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "longing"
+        instruction: "오랫동안 연락 없던 형제에게서 온 뜻밖의 연락으로 시작"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "anger_hurt"
+        instruction: "형제 사이를 갈라놓은 사건 소개. 재산, 오해, 서운함"
+      - phase: "layering"
+        time_range: [45, 120]
+        emotion: "memory_pain"
+        instruction: "어린 시절 함께했던 따뜻한 기억과 현재의 단절을 교차"
+      - phase: "reveal"
+        time_range: [120, 180]
+        emotion: "understanding"
+        instruction: "상대방의 입장에서 본 진실. 그때 그 사람도 아팠다는 것"
+      - phase: "climax"
+        time_range: [180, 240]
+        emotion: "tears_relief"
+        instruction: "재회의 순간. 말없이 안기는 장면"
+      - phase: "healing"
+        time_range: [240, 300]
+        emotion: "gratitude_love"
+        instruction: "다시 시작하는 관계. 놓쳤던 시간에 대한 아쉬움과 감사"
+    keywords: ["형", "누나", "동생", "어린시절", "방", "싸움", "명절"]
+
+  grandparent_memory:
+    name: "할머니의 기억"
+    description: "돌아가신 조부모와의 추억, 뒤늦게 깨닫는 사랑"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "gentle_sadness"
+        instruction: "할머니 집 냄새, 된장국, 마당 같은 감각적 기억으로 시작"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "regret"
+        instruction: "할머니를 귀찮아했던 어린 시절의 기억"
+      - phase: "layering"
+        time_range: [45, 120]
+        emotion: "warm_nostalgia"
+        instruction: "할머니와의 소소한 일상 에피소드를 촘촘히 쌓기"
+      - phase: "reveal"
+        time_range: [120, 180]
+        emotion: "hidden_love"
+        instruction: "할머니가 손주를 위해 몰래 했던 것들 (기도, 저금, 편지)"
+      - phase: "climax"
+        time_range: [180, 240]
+        emotion: "grief_love"
+        instruction: "할머니 부재를 실감하는 순간. 명절, 생일, 졸업식"
+      - phase: "healing"
+        time_range: [240, 300]
+        emotion: "peaceful_gratitude"
+        instruction: "할머니의 사랑이 여전히 살아있음을 느끼는 마무리"
+    keywords: ["할머니", "시골", "된장", "마당", "용돈", "이불", "전화"]
+
+  father_daughter_wedding:
+    name: "아버지와 딸의 결혼식"
+    description: "딸의 결혼을 앞둔 아버지의 복잡한 감정"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "bittersweet"
+        instruction: "결혼식 날 아침, 아버지가 혼자 딸의 어린 시절 사진을 보는 장면"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "inner_conflict"
+        instruction: "축하해야 하지만 보내기 싫은 아버지의 복잡한 마음"
+      - phase: "layering"
+        time_range: [45, 120]
+        emotion: "fatherly_love"
+        instruction: "딸을 키우며 겪은 순간들. 첫 걸음마, 운동회, 졸업식"
+      - phase: "reveal"
+        time_range: [120, 180]
+        emotion: "vulnerability"
+        instruction: "무뚝뚝한 아버지가 숨겨왔던 감정. 딸의 일기장을 몰래 읽었던 것"
+      - phase: "climax"
+        time_range: [180, 240]
+        emotion: "overwhelming_emotion"
+        instruction: "버진로드. 딸의 손을 잡고 걸으며 눈물을 참는 아버지"
+      - phase: "healing"
+        time_range: [240, 300]
+        emotion: "proud_love"
+        instruction: "아버지의 축사. 짧지만 진심이 담긴 한마디"
+    keywords: ["결혼", "버진로드", "아버지", "딸", "축사", "웨딩드레스", "손"]
+
+  late_realization:
+    name: "늦은 깨달음"
+    description: "떠나보내고 나서야 깨닫는 사랑의 소중함"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "emptiness"
+        instruction: "텅 빈 방, 꺼진 전화, 남겨진 물건으로 부재를 체감하는 시작"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "guilt"
+        instruction: "생전에 하지 못했던 것들에 대한 자책"
+      - phase: "layering"
+        time_range: [45, 120]
+        emotion: "painful_memory"
+        instruction: "함께했던 시간들을 되감기. 당시에는 몰랐던 소중함"
+      - phase: "reveal"
+        time_range: [120, 180]
+        emotion: "devastating_truth"
+        instruction: "고인이 남긴 편지, 메모, 녹음 등에서 발견한 마지막 메시지"
+      - phase: "climax"
+        time_range: [180, 240]
+        emotion: "catharsis"
+        instruction: "억눌렀던 감정이 한꺼번에 터지는 순간"
+      - phase: "healing"
+        time_range: [240, 300]
+        emotion: "acceptance_hope"
+        instruction: "떠난 이의 사랑을 안고 살아가겠다는 다짐"
+    keywords: ["편지", "유품", "사진", "전화", "마지막", "빈자리", "기일"]
+
+  remarriage_parent:
+    name: "재혼 부모의 사랑"
+    description: "새아버지 또는 새어머니와의 진심 어린 관계 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "tension"
+        instruction: "'엄마가 아닌 사람'이라 불렀던 첫 만남의 기억으로 시작"
+      - phase: "conflict"
+        time_range: [15, 45]
+        emotion: "anger_hurt"
+        instruction: "재혼 부모를 거부하고 반항했던 시절"
+      - phase: "layering"
+        time_range: [45, 150]
+        emotion: "slow_understanding"
+        instruction: "새 부모가 조용히 해준 것들을 하나씩 발견하는 과정"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "hidden_love"
+        instruction: "새 부모가 숨겨온 진심 (친자식처럼 사랑했다는 증거)"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "overwhelming_emotion"
+        instruction: "처음으로 '아버지' 또는 '어머니'라고 부르는 순간"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "warmth_peace"
+        instruction: "늦었지만 진짜 가족이 되는 따뜻한 마무리"
+    keywords: ["재혼", "새엄마", "새아빠", "의붓", "가족", "진심"]
+
+  inlaw_relationship:
+    name: "며느리와 시어머니"
+    description: "고부갈등을 넘어 서로를 이해하게 되는 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "tension"
+        instruction: "시어머니와의 첫 갈등 장면으로 시작"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "frustration"
+        instruction: "서로 다른 세대, 다른 방식으로 인한 오해와 갈등"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "gradual_understanding"
+        instruction: "시어머니의 과거를 알게 되며 이해하기 시작"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "hidden_love"
+        instruction: "시어머니가 며느리를 위해 몰래 해온 것들"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "tears_relief"
+        instruction: "서로 안고 우는 화해의 순간"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "family_warmth"
+        instruction: "진짜 모녀가 된 두 사람의 일상"
+    keywords: ["시어머니", "며느리", "고부", "화해", "이해", "세대"]
+
+  grandchild_love:
+    name: "손주와 할아버지"
+    description: "손주를 통해 삶의 의미를 되찾는 할아버지 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "gentle_sadness"
+        instruction: "은퇴 후 무기력한 할아버지의 일상으로 시작"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "emptiness"
+        instruction: "가족에게 짐이 된다고 느끼는 할아버지"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "warm_nostalgia"
+        instruction: "손주를 돌보기 시작하면서 생기를 되찾는 과정"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "innocent_love"
+        instruction: "손주가 할아버지에 대해 쓴 그림일기나 편지"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "overwhelming_emotion"
+        instruction: "'할아버지가 세상에서 제일 좋아요' 한마디에 무너지는 할아버지"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "peaceful_gratitude"
+        instruction: "손주와 함께하는 따뜻한 일상"
+    keywords: ["할아버지", "손주", "손녀", "은퇴", "노년", "동심", "사랑"]
+
+  holiday_reunion:
+    name: "명절의 재회"
+    description: "오랫동안 뿔뿔이 흩어졌던 가족이 명절에 다시 모이는 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "longing"
+        instruction: "추석/설날, 텅 빈 집에서 가족을 기다리는 어머니"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "sadness"
+        instruction: "각자의 사정으로 명절에 모이지 못하게 된 사연"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "warm_nostalgia"
+        instruction: "어린 시절 온 가족이 함께했던 명절 기억"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "surprise_joy"
+        instruction: "가족들이 몰래 준비한 깜짝 방문"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "overwhelming_emotion"
+        instruction: "현관문을 열었을 때 온 가족이 모여있는 순간"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "family_warmth"
+        instruction: "함께 음식을 나누며 웃는 가족의 모습"
+    keywords: ["명절", "추석", "설날", "가족모임", "고향", "어머니", "재회"]
+
+  career_sacrifice_parent:
+    name: "일하는 부모의 미안함"
+    description: "생계를 위해 아이와 함께하지 못한 부모의 이야기"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "guilt"
+        instruction: "아이의 발표회에 빈 자리가 있는 장면으로 시작"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "inner_conflict"
+        instruction: "돈을 벌어야 하지만 아이와 함께하고 싶은 부모의 갈등"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "painful_memory"
+        instruction: "놓친 운동회, 졸업식, 생일... 하나씩 떠올리기"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "understanding"
+        instruction: "성인이 된 자녀가 부모의 급여명세서나 일기를 발견"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "catharsis"
+        instruction: "자녀가 부모에게 '이제 제가 지켜드릴게요'라고 하는 순간"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "proud_love"
+        instruction: "부모가 은퇴하고 가족과 함께하는 시간"
+    keywords: ["맞벌이", "야근", "빈자리", "운동회", "미안", "급여", "은퇴"]
+
+  immigrant_parent:
+    name: "이민 부모의 눈물"
+    description: "타국에서 고생한 부모, 뒤늦게 알게 된 이민의 이유"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "curiosity_sadness"
+        instruction: "부모의 낡은 여권에서 발견한 오래된 사진"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "alienation"
+        instruction: "말도 통하지 않는 나라에서 고생하는 부모의 초기 이민 시절"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "painful_memory"
+        instruction: "차별, 고된 노동, 외로움을 견디며 자녀를 키운 과정"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "devastating_truth"
+        instruction: "이민의 진짜 이유 - 자녀의 미래를 위한 선택이었다는 것"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "deep_sadness_gratitude"
+        instruction: "부모가 꿈꾸었던 자녀의 모습이 바로 지금의 나"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "acceptance_hope"
+        instruction: "부모의 희생 위에 선 현재에 대한 감사"
+    keywords: ["이민", "해외", "타국", "외국", "고생", "희생", "꿈"]
+
+  couple_growing_old:
+    name: "함께 늙어가는 부부"
+    description: "수십 년을 함께한 부부의 사랑과 그리움"
+    structure:
+      - phase: "hook"
+        time_range: [0, 15]
+        emotion: "bittersweet"
+        instruction: "병원 복도에서 아내의 손을 잡고 있는 남편의 뒷모습"
+      - phase: "conflict"
+        time_range: [15, 50]
+        emotion: "fear"
+        instruction: "배우자의 건강 악화로 처음 느끼는 이별의 두려움"
+      - phase: "layering"
+        time_range: [50, 150]
+        emotion: "warm_nostalgia"
+        instruction: "젊은 시절의 연애, 결혼, 자녀 양육의 추억"
+      - phase: "reveal"
+        time_range: [150, 240]
+        emotion: "hidden_love"
+        instruction: "무뚝뚝한 남편이 50년간 몰래 써온 아내에 대한 일기"
+      - phase: "climax"
+        time_range: [240, 320]
+        emotion: "overwhelming_emotion"
+        instruction: "'다음 생에도 당신과 결혼하겠소' 한마디"
+      - phase: "healing"
+        time_range: [320, 400]
+        emotion: "peaceful_gratitude"
+        instruction: "병상에서도 함께 웃는 두 사람"
+    keywords: ["부부", "아내", "남편", "사랑", "노년", "병원", "평생"]
+
+# Retention engineering rules
+retention:
+  curiosity_gap_interval_sec: 20
+  emotional_reversal_position: 0.55  # 55% of video
+  silence_before_climax_sec: 1.5
+  min_scene_duration_sec: 3.0
+  senior_reading_speed_syllables_per_sec: 3.5
+  subtitle_font_size_min: 48
+  music_fade_before_reveal_sec: 2.0
+  zoom_in_on_emotion: true
+  zoom_in_speed: "slow"  # slow, medium

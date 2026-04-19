@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+credentials/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project artifacts
+projects/
+logs/
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/bgm/*.mp3
+assets/bgm/*.wav
+assets/sfx/*.mp3
+assets/sfx/*.wav
+assets/overlays/*.png
+
+# Batch state
+batch/queue.json
+batch/retry_queue.json

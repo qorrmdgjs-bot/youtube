@@ -1,0 +1,44 @@
+# BGM Library - Single track for all videos
+# license field is required for every track
+
+tracks:
+  lullaby_for_the_lost:
+    file: "lullaby_for_the_lost.mp3"
+    name: "Lullaby for the Lost"
+    mood: ["warm", "nostalgia", "gentle_sadness", "hopeful", "healing", "contemplation", "catharsis"]
+    bpm: 70
+    duration_sec: 192
+    license: "Royalty Free"
+    intensity: "medium"
+
+# All emotions map to the single track
+emotion_mood_map:
+  curiosity_sadness: ["gentle_sadness", "contemplation"]
+  tension: ["tension"]
+  nostalgia_sadness: ["nostalgia", "gentle_sadness"]
+  shock_realization: ["tension", "reveal"]
+  deep_sadness_gratitude: ["catharsis"]
+  warmth_peace: ["warm", "healing"]
+  gentle_hope: ["hopeful", "warmth"]
+  longing: ["nostalgia"]
+  memory_pain: ["nostalgia", "gentle_sadness"]
+  understanding: ["contemplation", "warm"]
+  tears_relief: ["catharsis", "healing"]
+  gratitude_love: ["warm"]
+  regret: ["gentle_sadness"]
+  warm_nostalgia: ["nostalgia", "warm"]
+  hidden_love: ["warm", "gentle_sadness"]
+  grief_love: ["catharsis"]
+  peaceful_gratitude: ["warm"]
+  bittersweet: ["nostalgia", "gentle_sadness"]
+  inner_conflict: ["contemplation"]
+  fatherly_love: ["warm"]
+  vulnerability: ["contemplation", "gentle_sadness"]
+  overwhelming_emotion: ["catharsis"]
+  proud_love: ["warm", "hopeful"]
+  emptiness: ["contemplation"]
+  guilt: ["gentle_sadness"]
+  painful_memory: ["nostalgia", "gentle_sadness"]
+  devastating_truth: ["catharsis"]
+  catharsis: ["catharsis"]
+  acceptance_hope: ["healing", "hopeful"]
