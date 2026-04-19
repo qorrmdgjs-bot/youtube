@@ -36,6 +36,57 @@ REPLICATE_API_TOKEN=r8_xxxxx            # 설정 완료 - FLUX.1 이미지 + Wan
 ELEVENLABS_API_KEY=sk_xxxxx             # 설정 완료 - 고품질 한국어 TTS (유료 Starter 플랜)
 ```
 
+## 다른 기기에서 셋업
+
+GitHub repo: https://github.com/qorrmdgjs-bot/youtube (public)
+
+### 새 Mac에서 처음 셋업할 때
+
+```bash
+# 1. 레포 클론
+gh repo clone qorrmdgjs-bot/youtube
+cd youtube
+
+# 2. Python 환경 (3.11)
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# 3. FFmpeg (libass/drawtext 필수)
+brew tap homebrew-ffmpeg/ffmpeg
+brew install homebrew-ffmpeg/ffmpeg/ffmpeg
+
+# 4. 비밀 파일 수동 전달 (git에 없음)
+#    - .env (API 키 4개)
+#    - credentials/tts-service-account.json (Google TTS)
+#    → AirDrop, 1Password, 암호화 USB 등으로 안전하게 전달
+```
+
+### 일상 작업 흐름
+
+```bash
+# 작업 시작 시
+git pull
+
+# 작업 종료 시
+git add . && git commit -m "..." && git push
+```
+
+### iPhone / iPad에서
+
+- **Working Copy** 앱 — git clone, 코드 열람·간단 편집·커밋·푸시 (파이프라인 실행은 불가)
+- **GitHub 모바일 앱** — 코드 열람, 이슈 관리
+
+### git에서 제외되는 것 (수동 동기화 필요)
+
+| 경로 | 처리 방법 |
+|------|----------|
+| `.env`, `credentials/` | 수동 전달 (보안) |
+| `.venv/` | 기기마다 새로 생성 |
+| `projects/` | 생성된 영상 — 필요시 별도 백업 |
+| `logs/` | 기기별 로컬 로그 |
+| `assets/fonts/`, `assets/bgm/*.mp3`, `assets/sfx/`, `assets/overlays/` | 라이선스 이슈 → 수동 동기화 |
+
 ## 프로젝트 구조
 
 ```
