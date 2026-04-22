@@ -58,10 +58,11 @@ JSON 형식으로 응답하세요:
 # Default character descriptions by family type
 CHARACTER_TEMPLATES = {
     "parent_sacrifice": {
-        "mother": "a Korean mother in her 50s, short permed dark brown hair, warm gentle eyes, wearing a simple apron over modest clothes, slightly weathered hands, kind facial expression",
-        "father": "a Korean father in his 50s, short neat black hair with some gray, square jaw, wearing a worn button-up shirt, strong but tired eyes, stoic expression",
-        "son": "a Korean young man in his late 20s, neat dark hair parted to the side, wearing a gray crewneck sweater, handsome face with emotional eyes",
-        "daughter": "a Korean young woman in her late 20s, long straight dark hair, wearing a simple blouse, soft gentle facial features",
+        "father": "a Korean father born 1949, in his late 40s (1990s setting), short neat black hair with gray temples, square jaw, strong but weary eyes from years of hard work, formerly wore neat suits as a finance worker, now wears a simple worn jacket as a taxi driver, stoic but loving expression, weathered face showing sacrifice",
+        "mother": "a Korean mother born 1957, in her late 30s to early 40s (1990s setting), short permed dark brown hair, warm gentle eyes, wearing a simple apron over modest clothes, slightly weathered hands from housework, kind and enduring facial expression, devoted housewife",
+        "son": "a Korean young man born 1975, teenager to early 20s (1990s setting), neat dark hair parted to the side, wearing school uniform or casual 90s Korean fashion, handsome face with emotional sensitive eyes, the middle child between two sisters",
+        "older_sister": "a Korean young woman born early 1970s, the eldest sibling, long dark hair often tied back neatly, mature and responsible expression, wearing modest practical clothes, motherly caring demeanor toward younger siblings",
+        "younger_sister": "a Korean girl born late 1970s, the youngest sibling, shoulder-length hair with bangs, bright curious eyes, playful carefree expression, wearing colorful youthful 90s Korean fashion, innocent and spirited",
     },
     "default": {
         "mother": "a Korean mother in her 50s, short permed dark brown hair, warm gentle eyes, wearing modest traditional clothes",
