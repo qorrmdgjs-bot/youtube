@@ -20,7 +20,7 @@ from src.pipeline.base_stage import BaseStage
 
 class VideoComposeStage(BaseStage):
     name = "h_video_compose"
-    dependencies = ["d_tts_gen", "e_bgm_select", "f_subtitle_split", "g_image_gen"]
+    dependencies = ["d_tts_gen", "e_bgm_select", "f_subtitle_split", "g_image_gen"]  # Ken Burns only (no G2)
 
     def execute(self, project_dir: Path, manifest: ProjectManifest) -> float:
         script = Script.model_validate_json(
@@ -39,14 +39,11 @@ class VideoComposeStage(BaseStage):
         video_dir.mkdir(exist_ok=True)
         scenes_dir = project_dir / "scenes"
 
-        # Step 1: Create video clips for each scene
-        # Use AI-generated video clips if available, fall back to Ken Burns
+        # Step 1: Create video clips from images using Ken Burns effect
         self.log.info("step_video_clips_start")
         scene_clips: list[Path] = []
-        video_clips_dir = project_dir / "video_clips"
 
         for scene in script.scenes:
-            ai_clip_path = video_clips_dir / f"clip_{scene.index:03d}.mp4"
             image_path = scenes_dir / f"scene_{scene.index:03d}.png"
             clip_path = video_dir / f"clip_{scene.index:03d}.mp4"
 
@@ -54,15 +51,7 @@ class VideoComposeStage(BaseStage):
             if scene.has_silence_before:
                 total_duration += scene.silence_duration_sec
 
-            if ai_clip_path.exists():
-                # AI video clip exists - loop/extend it to match scene duration
-                self._extend_clip_to_duration(
-                    ai_clip_path, clip_path, total_duration,
-                    video_config.get("fps", 24),
-                )
-                self.log.info("ai_clip_used", scene=scene.index, duration=total_duration)
-            elif image_path.exists():
-                # Fallback to Ken Burns
+            if image_path.exists():
                 ken_burns_scene(
                     image_path=image_path,
                     output_path=clip_path,
@@ -72,7 +61,7 @@ class VideoComposeStage(BaseStage):
                     max_zoom=scene_config.get("ken_burns_max_zoom", 1.3),
                     scene_index=scene.index,
                 )
-                self.log.info("ken_burns_fallback", scene=scene.index, duration=total_duration)
+                self.log.info("ken_burns_applied", scene=scene.index, duration=total_duration)
             else:
                 self.log.warning("no_visual_source", scene=scene.index)
                 continue
@@ -149,61 +138,3 @@ class VideoComposeStage(BaseStage):
 
         self.log.info("video_compose_complete", final=str(final_path))
         return 0.0  # No API cost for video composition
-
-    def _extend_clip_to_duration(
-        self, clip_path: Path, output_path: Path, target_duration: float, fps: int
-    ) -> None:
-        """Extend a short AI clip to match the scene duration.
-
-        Uses slow-motion + loop + scale to 1920x1080 to fill the target duration.
-        """
-        import subprocess
-
-        # Get original clip duration
-        from src.engines.ffmpeg_wrapper import _get_duration
-        original_dur = _get_duration(clip_path)
-        if original_dur <= 0:
-            original_dur = 4.0
-
-        # Calculate slowdown factor to stretch the clip
-        # If clip is 4s and we need 12s, slow down by 3x (minimum 0.25x speed)
-        slowdown = min(target_duration / original_dur, 4.0)
-
-        # Use setpts to slow down + scale to 1920x1080
-        pts_factor = slowdown
-        filter_str = (
-            f"setpts={pts_factor}*PTS,"
-            f"scale=1920:1080:force_original_aspect_ratio=decrease,"
-            f"pad=1920:1080:(ow-iw)/2:(oh-ih)/2,"
-            f"fps={fps}"
-        )
-
-        result = subprocess.run(
-            [
-                "ffmpeg", "-y",
-                "-stream_loop", "-1",  # Loop if still too short
-                "-i", str(clip_path),
-                "-vf", filter_str,
-                "-t", str(target_duration),
-                "-c:v", "libx264",
-                "-preset", "medium",
-                "-crf", "23",
-                "-pix_fmt", "yuv420p",
-                "-an",  # No audio from clip
-                str(output_path),
-            ],
-            capture_output=True,
-        )
-
-        if result.returncode != 0:
-            self.log.warning("clip_extend_failed_using_kenburns", scene=str(clip_path))
-            # Fallback to Ken Burns on the original image
-            from src.engines.ffmpeg_wrapper import ken_burns_scene
-            image_path = clip_path.parent.parent / "scenes" / clip_path.name.replace("clip_", "scene_").replace(".mp4", ".png")
-            if image_path.exists():
-                ken_burns_scene(
-                    image_path=image_path,
-                    output_path=output_path,
-                    duration_sec=target_duration,
-                    fps=fps,
-                )

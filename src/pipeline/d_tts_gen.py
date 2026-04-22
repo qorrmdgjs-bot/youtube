@@ -173,17 +173,17 @@ class TTSGenStage(BaseStage):
         self, script, audio_paths: list[Path], output_path: Path
     ) -> None:
         """Concatenate scene audio with natural silence gaps between scenes."""
-        import tempfile
+        # Write concat list in the project directory (avoids Windows temp path encoding issues)
+        list_file = audio_paths[0].parent / "_concat_list.txt"
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+        with open(list_file, "w", encoding="utf-8") as f:
             for i, p in enumerate(audio_paths):
-                f.write(f"file '{p.resolve()}'\n")
+                f.write(f"file '{p.resolve().as_posix()}'\n")
                 # Add short silence between scenes (not after last)
                 if i < len(audio_paths) - 1:
                     silence_path = p.parent / f"_silence_{i}.mp3"
                     self._create_silence(silence_path, 0.8)  # 0.8s gap
-                    f.write(f"file '{silence_path.resolve()}'\n")
-            list_file = f.name
+                    f.write(f"file '{silence_path.resolve().as_posix()}'\n")
 
         try:
             subprocess.run(
@@ -191,7 +191,7 @@ class TTSGenStage(BaseStage):
                     "ffmpeg", "-y",
                     "-f", "concat",
                     "-safe", "0",
-                    "-i", list_file,
+                    "-i", str(list_file),
                     "-c", "copy",
                     str(output_path),
                 ],
@@ -199,7 +199,7 @@ class TTSGenStage(BaseStage):
                 check=True,
             )
         finally:
-            Path(list_file).unlink(missing_ok=True)
+            list_file.unlink(missing_ok=True)
             # Clean up silence files
             for i in range(len(audio_paths) - 1):
                 (audio_paths[0].parent / f"_silence_{i}.mp3").unlink(missing_ok=True)

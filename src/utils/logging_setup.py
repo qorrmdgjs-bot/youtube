@@ -18,8 +18,10 @@ def setup_logging(log_dir: str = "logs", level: int = logging.INFO) -> None:
     file_handler = logging.FileHandler(log_path / "pipeline.log", encoding="utf-8")
     file_handler.setLevel(level)
 
-    # Console handler - readable format
-    console_handler = logging.StreamHandler(sys.stderr)
+    # Console handler - readable format (UTF-8 for Windows emoji support)
+    import io
+    utf8_stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    console_handler = logging.StreamHandler(utf8_stderr)
     console_handler.setLevel(level)
 
     logging.basicConfig(
@@ -37,7 +39,7 @@ def setup_logging(log_dir: str = "logs", level: int = logging.INFO) -> None:
         ],
         wrapper_class=structlog.make_filtering_bound_logger(level),
         context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
+        logger_factory=structlog.PrintLoggerFactory(file=io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")),
         cache_logger_on_first_use=True,
     )
 

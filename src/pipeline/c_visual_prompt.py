@@ -15,13 +15,15 @@ from src.engines.llm_client import LLMClient, PROJECT_ROOT
 from src.models import ProjectManifest, Script
 from src.pipeline.base_stage import BaseStage
 
-# Style prefix for all images - Korean webtoon style
+# Style prefix for all images - Korean webtoon style (시니어 친화)
 STYLE_PREFIX = (
     "Korean manhwa webtoon style illustration, "
-    "detailed clean line art, warm earthy color palette, "
-    "realistic proportions, expressive character faces, "
-    "detailed Korean background setting, "
-    "soft warm lighting, nostalgic atmosphere, "
+    "detailed clean line art, warm earthy color palette with soft browns beiges and creams, "
+    "realistic proportions, deeply expressive character faces showing genuine emotion, "
+    "detailed authentic Korean background setting, "
+    "soft golden warm lighting, nostalgic sentimental atmosphere, "
+    "gentle color gradation, muted pastel tones, "
+    "heartwarming family scene, emotionally touching mood, "
     "high quality digital illustration, "
 )
 
@@ -39,11 +41,13 @@ VISUAL_PROMPT_TEMPLATE = """다음 장면의 visual_description을 바탕으로 
 ## 스타일 규칙
 - 영어로 작성
 - 한국 웹툰(만화) 스타일 (Korean manhwa webtoon style)
-- 깔끔한 라인 아트 + 따뜻한 어스톤 색감 (warm earthy tones)
+- 깔끔한 라인 아트 + 따뜻한 어스톤 색감 (warm earthy tones: 브라운, 베이지, 크림)
 - 사실적 비율의 인물 (애니메이션이 아닌 웹툰 비율)
-- 인물의 표정과 감정을 섬세하고 풍부하게 묘사
-- 한국적 배경을 상세히 묘사 (한국 가정집, 시장, 학교, 식당 등)
-- 부드러운 조명과 노스탤지어 분위기
+- 인물의 표정과 감정을 섬세하고 풍부하게 묘사 (눈가의 주름, 떨리는 입술, 젖은 눈 등)
+- 한국적 배경을 상세히 묘사 (한국 가정집, 시장, 학교, 식당, 시골집, 병원 등)
+- 부드러운 황금빛 조명과 노스탤지어 분위기
+- 색감은 채도를 낮추고 파스텔 톤으로 따뜻하게
+- 50-70세 시니어가 공감할 수 있는 한국적 정서와 풍경
 - 캐릭터 외모 설명을 반드시 포함하여 일관성 유지
 - 부정적 프롬프트 없이 긍정 묘사만
 

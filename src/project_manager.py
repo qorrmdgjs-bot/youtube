@@ -21,7 +21,7 @@ ALL_STAGES = [
     "e_bgm_select",
     "f_subtitle_split",
     "g_image_gen",
-    "g2_image_to_video",
+    # g2_image_to_video 제거 — Ken Burns 효과로 대체
     "h_video_compose",
     "i_thumbnail_gen",
     "j_metadata_gen",

@@ -13,14 +13,21 @@
 
 ## 개발 환경
 
+### macOS (Apple M3, 8GB RAM)
 - Python 3.11.15 (pyenv로 설치, `.python-version` 참조)
 - 가상환경: `.venv/` (`source .venv/bin/activate`)
 - 패키지 관리: pip + hatchling (`pyproject.toml`)
-- OS: macOS (Apple M3, 8GB RAM)
 - FFmpeg 8.1 (`homebrew-ffmpeg/ffmpeg` 탭, libass/drawtext 포함)
 - GitHub CLI: `gh` (brew로 설치됨, `qorrmdgjs-bot` 계정 인증 완료)
 
-### 환경 활성화 명령
+### Windows 11 PC (2026-04-22 추가)
+- Python 3.12.9 (시스템 설치)
+- 패키지 관리: pip + hatchling (`pip install -e .`)
+- FFmpeg 8.1 (gyan.dev full build, libass 포함)
+- Pydantic 2.13+ 필요 (`ensure_ascii` 지원)
+- 한글 경로 이슈 주의 (아래 "Windows 한글 경로 이슈" 참조)
+
+### 환경 활성화 명령 (macOS)
 ```bash
 eval "$(/opt/homebrew/bin/brew shellenv)"
 export PYENV_ROOT="$HOME/.pyenv"
@@ -30,10 +37,10 @@ source .venv/bin/activate
 
 ### 환경변수 (.env)
 ```
-ANTHROPIC_API_KEY=sk-ant-xxxxx          # 필수 - Claude API (설정 완료)
-GOOGLE_APPLICATION_CREDENTIALS=credentials/tts-service-account.json  # 설정 완료 - Google Cloud TTS (폴백)
-REPLICATE_API_TOKEN=r8_xxxxx            # 설정 완료 - FLUX.1 이미지 + Wan 2.1 영상
-ELEVENLABS_API_KEY=sk_xxxxx             # 설정 완료 - 고품질 한국어 TTS (유료 Starter 플랜)
+ANTHROPIC_API_KEY=sk-ant-xxxxx          # 필수 - Claude API
+REPLICATE_API_TOKEN=r8_xxxxx            # 필수 - FLUX.1 이미지
+ELEVENLABS_API_KEY=sk_xxxxx             # 필수 - 고품질 한국어 TTS (유료 Starter 플랜)
+GOOGLE_APPLICATION_CREDENTIALS=credentials/tts-service-account.json  # 선택 - Google Cloud TTS (폴백, 없어도 됨)
 ```
 
 ## 다른 기기에서 셋업
@@ -57,9 +64,25 @@ brew tap homebrew-ffmpeg/ffmpeg
 brew install homebrew-ffmpeg/ffmpeg/ffmpeg
 
 # 4. 비밀 파일 수동 전달 (git에 없음)
-#    - .env (API 키 4개)
-#    - credentials/tts-service-account.json (Google TTS)
+#    - .env (API 키 3개: ANTHROPIC, REPLICATE, ELEVENLABS)
 #    → AirDrop, 1Password, 암호화 USB 등으로 안전하게 전달
+```
+
+### Windows PC에서 처음 셋업할 때
+
+```bash
+# 1. 레포 클론
+git clone https://github.com/qorrmdgjs-bot/youtube.git
+cd youtube
+
+# 2. 패키지 설치 (Python 3.12+)
+pip install -e .
+pip install replicate  # pyproject.toml에 없으므로 별도 설치
+
+# 3. FFmpeg 설치
+# gyan.dev에서 full build 다운로드 → PATH에 추가
+
+# 4. .env 파일 생성 (API 키 3개)
 ```
 
 ### 일상 작업 흐름
@@ -113,16 +136,16 @@ youtube/
 │   ├── orchestrator.py       # 파이프라인 DAG 컨트롤러
 │   ├── project_manager.py    # 프로젝트 디렉토리 CRUD
 │   │
-│   ├── pipeline/             # 14개 파이프라인 스테이지 (A~M + G2)
+│   ├── pipeline/             # 13개 파이프라인 스테이지 (A~M, G2 제거)
 │   │   ├── a_script_gen.py     # LLM 스크립트 생성
 │   │   ├── b_scene_segment.py  # 장면 분할 + 서브씬 자동 분할 (15초 초과 시)
-│   │   ├── c_visual_prompt.py  # 이미지 프롬프트 추출 (웹툰 스타일 + 캐릭터 일관성 템플릿)
+│   │   ├── c_visual_prompt.py  # 이미지 프롬프트 추출 (시니어 친화 웹툰 스타일 + 캐릭터 일관성)
 │   │   ├── d_tts_gen.py        # TTS (ElevenLabs > Google > gTTS) + 오디오 후처리
 │   │   ├── e_bgm_select.py     # 감정 구간별 BGM 매칭 (단일곡 루프)
 │   │   ├── f_subtitle_split.py # SRT 자막 생성 (실제 TTS 오디오 길이 기반 동기화)
 │   │   ├── g_image_gen.py      # 이미지 생성 (FLUX.1 Pro, 1440x810)
-│   │   ├── g2_image_to_video.py # 이미지→영상 변환 (Wan 2.1, 5초 클립)
-│   │   ├── h_video_compose.py  # FFmpeg 합성 (AI 영상 클립 우선, Ken Burns 폴백)
+│   │   ├── g2_image_to_video.py # [비활성] 이미지→영상 변환 (비용 절감으로 제거, Ken Burns 대체)
+│   │   ├── h_video_compose.py  # FFmpeg 합성 (Ken Burns 6방향 효과)
 │   │   ├── i_thumbnail_gen.py  # 썸네일 (96px, 따뜻한 색보정, 이모지)
 │   │   ├── j_metadata_gen.py   # YouTube 메타데이터 (60-90자 이모지 제목)
 │   │   ├── k_monetization_desc.py  # 수익화 설명문 (가족유형별 CTA)
@@ -173,25 +196,29 @@ streamlit run dashboard.py --server.headless true   # → http://localhost:8501
 | 프로젝트 현황 | 전체 목록, 진행률, 영상/썸네일 미리보기, 다운로드, 실패 재시도 |
 | 비용 리포트 | 총 비용, 월 예산, 프로젝트별 비용 분석 |
 
-## 파이프라인 DAG (A~M + G2, 14단계)
+## 파이프라인 DAG (A~M, 13단계)
 
 ```
 A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
-  → C) 시각 프롬프트 (웹툰 스타일 + 캐릭터 일관성) → G) 이미지 (FLUX.1) → G2) 이미지→영상 (Wan 2.1) ─┐
-  → D) TTS (ElevenLabs Haechan 남성) → F) 자막 (TTS 오디오 동기화)                        ┤
-  → E) BGM (Lullaby for the Lost, 구간별 루프)                                             ┘
-    → H) 영상 합성 (AI 영상 클립 + BGM 처음~끝 재생 + 페이드아웃)
+  → C) 시각 프롬프트 (시니어 친화 웹툰 스타일 + 캐릭터 일관성) → G) 이미지 (FLUX.1) ─┐
+  → D) TTS (ElevenLabs Haechan 남성) → F) 자막 (TTS 오디오 동기화)                    ┤
+  → E) BGM (Lullaby for the Lost, 구간별 루프)                                         ┘
+    → H) 영상 합성 (Ken Burns 효과 + BGM 처음~끝 재생 + 페이드아웃)
       → I) 썸네일 / J) 메타 / K) 수익화 / L) 쇼츠 멀티클립
         → M) 최종 패키징
 ```
 
+> **참고**: G2(이미지→영상, Wan 2.1) 제거 — Ken Burns 효과로 대체하여 영상당 ~$2.20 절감
+
 ## 영상 스타일 - 한국 웹툰(만화) 스타일
 
 - **스타일**: 한국 웹툰(만화) 스타일 일러스트 (Korean manhwa webtoon style)
-- **프롬프트 키워드**: `Korean manhwa webtoon style illustration, detailed clean line art, warm earthy color palette, realistic proportions, expressive character faces, detailed Korean background setting`
+- **프롬프트 키워드**: `Korean manhwa webtoon style illustration, detailed clean line art, warm earthy color palette with soft browns beiges and creams, realistic proportions, deeply expressive character faces showing genuine emotion, detailed authentic Korean background setting, soft golden warm lighting, nostalgic sentimental atmosphere, gentle color gradation, muted pastel tones, heartwarming family scene, emotionally touching mood`
 - **라인**: 깔끔한 디지털 라인 아트 (수채화가 아님)
-- **색감**: 따뜻한 어스톤 (warm earthy tones) - 브라운, 베이지, 크림 계열
-- **배경**: 한국적 배경 상세 묘사 (한국 가정집, 시장, 사무실, 식당, 학교 등)
+- **색감**: 따뜻한 어스톤 (warm earthy tones) - 브라운, 베이지, 크림 계열 + 뮤트 파스텔
+- **조명**: 부드러운 황금빛 조명, 노스탤지어 분위기
+- **배경**: 한국적 배경 상세 묘사 (한국 가정집, 시장, 사무실, 식당, 학교, 시골집, 병원 등)
+- **감정**: 50-70세 시니어가 공감할 수 있는 한국적 정서와 풍경
 - **참고 채널**: 한국 감성 사연 웹툰 채널 스타일
 
 ### 캐릭터 일관성 (c_visual_prompt.py)
@@ -247,15 +274,15 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 | 기본 길이 | 5분 |
 | 이미지 스타일 | 한국 웹툰(만화) 스타일, 깔끔한 라인아트, 어스톤 색감 |
 | 이미지 생성 | FLUX.1 Pro, 1440x810 (API 제한) |
-| 영상 변환 | Wan 2.1 Image-to-Video (5초 클립, 슬로모션 확장) |
+| 영상 변환 | 제거됨 — Ken Burns 6방향 효과로 대체 (비용 절감) |
 | 장면 분할 | 15초 초과 시 서브씬 자동 분할 (장면당 1이미지) |
 | 오디오 | 44.1kHz 스테레오, EQ (250Hz 웜 부스트 + 4kHz 컷), -16 LUFS |
 | BGM | -3dB, 처음~끝 재생 + 페이드 아웃 |
 | 장면 전환 | 크로스페이드 (xfade, 폴백: fade-in/out) |
-| Ken Burns | 6방향 순환 (AI 영상 실패 시 폴백) |
+| Ken Burns | 6방향 순환 (기본 영상 효과) |
 | 장면간 호흡 | 0.8초 무음 갭 삽입 |
 | 인코딩 | H.264 CRF 23, medium preset |
-| 자막 | 22px, 반투명 검정 배경 박스 (BorderStyle=4), NanumSquareRoundEB, TTS 오디오 동기화 |
+| 자막 | 17px, 반투명 검정 배경 박스 (BorderStyle=4), NanumSquareRoundEB, TTS 오디오 동기화 |
 | 쇼츠 | 2-5개/영상, 15-30초, 9:16 센터크롭 |
 | 썸네일 | 96px 폰트, 따뜻한 색보정, 이모지, 프리클라이맥스 장면 |
 
@@ -284,26 +311,28 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 | Claude API (스크립트+메타) | ~$0.15 |
 | ElevenLabs TTS | ~$0.23 |
 | FLUX.1 이미지 (22장) | ~$1.21 |
-| Wan 2.1 영상 변환 (22개) | ~$2.20 |
-| **영상당 합계** | **~$3.80** |
+| Ken Burns 효과 (FFmpeg) | $0 |
+| **영상당 합계** | **~$1.60** |
+
+> **절감**: Wan 2.1 영상 변환 제거로 영상당 ~$2.20 절약
 
 ### 월간 비용
 | 항목 | 비용 |
 |------|------|
-| 영상 30편/월 | ~$114 |
+| 영상 30편/월 | ~$48 |
 | ElevenLabs 구독 | $5~22/월 |
 | Replicate | 사용량 과금 |
-| **월 합계** | **~$120-140** |
+| **월 합계** | **~$55-70** |
 
 ## 수익 전망 (현실적 분석)
 
 ### AI 자동화 채널 현실적 수익 예측
 | 시기 | 구독자 | 월 수익 | 월 비용 | 순이익 |
 |------|--------|---------|---------|--------|
-| 1-3개월 | ~500 | $0 (YPP 미승인) | ~$140 | -$140 |
-| 4-6개월 | ~2,000 | $20-50 | ~$140 | -$90 |
-| 7-12개월 | ~5,000 | $100-300 | ~$140 | +$160 |
-| 13-24개월 | ~15,000 | $300-800 | ~$140 | +$660 |
+| 1-3개월 | ~500 | $0 (YPP 미승인) | ~$70 | -$70 |
+| 4-6개월 | ~2,000 | $20-50 | ~$70 | -$20 |
+| 7-12개월 | ~5,000 | $100-300 | ~$70 | +$230 |
+| 13-24개월 | ~15,000 | $300-800 | ~$70 | +$730 |
 
 ### 수익화 조건 (YPP)
 - 구독자 1,000명 이상
@@ -326,6 +355,10 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 - [x] BGM 교체 (Lullaby for the Lost 단일곡, 처음~끝 재생 + 페이드아웃)
 - [x] 첫 영상 업로드 (2026-04-19, "어머니의 조건 없는 사랑")
 - [x] 두번째 영상 제작 (2026-04-19, "택시 기사 아버지의 새벽")
+- [x] G2(Wan 2.1) 제거 → Ken Burns 전환 (비용 절감, 2026-04-22)
+- [x] 시니어 친화 이미지 스타일 강화 (파스텔톤, 황금빛 조명, 감성 키워드)
+- [x] Windows 환경 셋업 + 한글 경로 이슈 수정 (2026-04-22)
+- [x] 세번째 영상 제작 (2026-04-22, "부모님과 함께한 행복한 추억", $1.85)
 - [ ] YouTube 자동 업로드 (YouTube Data API v3)
 - [ ] 매일 자동 실행 스케줄러 (cron/launchd)
 - [ ] 주제 자동 생성 (AI가 매일 새 줄거리 생성)
@@ -351,6 +384,18 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 - ElevenLabs Haechan 남성 음성
 - BGM: Lullaby for the Lost
 - 쇼츠 3개 (hook, reveal, memory)
+
+### 7차: "부모님과 함께한 행복한 추억" (Windows 환경 첫 제작, 2026-04-22)
+- 13/13 완료 (G2 제거), **$1.85**
+- 제목: "어린 시절 부모님과 함께한 그 시간들이 지금도 눈물나게 그리운 이유 😭 아버지 어깨 위 세상, 어머니 손맛 김밥의 추억 ❤️"
+- 장면 26개 (서브씬 분할)
+- 시니어 친화 웹툰 스타일 (파스텔톤 + 황금빛 조명)
+- ElevenLabs Haechan 남성 음성
+- Ken Burns 효과 (Wan 2.1 제거, 비용 절감)
+- BGM: 사용자 제공 BGM.m4a (볼륨 -10dB)
+- 자막: 17px (기존 52px에서 1/3 축소)
+- 쇼츠 2개 (hook, memory)
+- 프로젝트: `projects/20260422_141423_dab0b7`
 
 ## 업로드 워크플로우
 
@@ -384,7 +429,7 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 ### 폰트 (assets/fonts/) - 3개
 | 파일 | 용도 |
 |------|------|
-| NanumSquareRoundExtraBold.ttf | 자막 (22px, 반투명 배경 박스) |
+| NanumSquareRoundExtraBold.ttf | 자막 (17px, 반투명 배경 박스) |
 | NanumMyeongjo.ttf | 썸네일 제목 (96px) |
 | NanumGothicBold.ttf | 폴백 폰트 |
 
@@ -402,12 +447,38 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 | ElevenLabs 미설정 | Google Cloud TTS (Neural2) |
 | Google Cloud TTS 미설정 | gTTS (무료) |
 | Replicate 미설정 | Pillow placeholder 이미지 |
-| Image-to-Video 실패 | Ken Burns 6방향 효과 |
+| Image-to-Video | 제거됨 — Ken Burns 6방향 효과로 대체 |
 | BGM 파일 미존재 | ffmpeg 무음 파일 |
 | 오디오 믹싱 실패 | 내레이션만 사용 |
 | 자막 번인 실패 | 자막 없이 영상 |
 | HW 가속 실패 | libx264 소프트웨어 인코딩 |
 | xfade 전환 실패 | fade-in/out 개별 폴백 |
+
+## Windows 한글 경로 이슈 (2026-04-22 수정)
+
+Windows 사용자명에 한글(`백승헌`)이 포함되어 다음 문제가 발생함:
+
+| 문제 | 원인 | 수정 |
+|------|------|------|
+| ffmpeg concat 실패 (d_tts_gen) | `tempfile`이 한글 임시 경로 생성 | 프로젝트 디렉토리에 concat 파일 생성 + `as_posix()` 경로 |
+| 자막 번인 실패 (ffmpeg_wrapper) | `subtitles=` 필터가 한글 경로 파싱 불가 | 프로젝트 video 디렉토리에 임시 srt 복사 + forward slash 경로 |
+| 로그 이모지 출력 에러 (logging_setup) | Windows cp949 코덱이 이모지 미지원 | `io.TextIOWrapper(encoding="utf-8")` 래핑 |
+| Pydantic `ensure_ascii` 미지원 | Pydantic 2.10에서 미지원 | Pydantic 2.13+ 업그레이드 |
+
+**핵심 원칙**: Windows에서는 `tempfile` 대신 프로젝트 디렉토리 사용, 경로는 `Path.as_posix()`로 변환
+
+## 코드 변경 이력 (2026-04-22)
+
+| 파일 | 변경 내용 |
+|------|----------|
+| `src/orchestrator.py` | G2 스테이지 DAG에서 제거 |
+| `src/cli.py` | G2 스테이지 등록 제거 |
+| `src/project_manager.py` | ALL_STAGES에서 G2 제거 |
+| `src/pipeline/h_video_compose.py` | AI 클립 참조 제거, Ken Burns만 사용, `_extend_clip_to_duration` 삭제 |
+| `src/pipeline/c_visual_prompt.py` | STYLE_PREFIX 시니어 친화 강화 (파스텔톤, 황금빛 조명, 감성 키워드) |
+| `src/pipeline/d_tts_gen.py` | concat 파일을 프로젝트 디렉토리에 생성, `as_posix()` 경로 |
+| `src/engines/ffmpeg_wrapper.py` | 자막 임시 파일을 video 디렉토리에 생성, forward slash 경로 |
+| `src/utils/logging_setup.py` | UTF-8 출력 래핑 (Windows 이모지 지원) |
 
 ## GitHub
 

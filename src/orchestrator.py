@@ -20,8 +20,8 @@ STAGE_DEPS: dict[str, list[str]] = {
     "e_bgm_select": ["b_scene_segment"],
     "f_subtitle_split": ["b_scene_segment"],
     "g_image_gen": ["c_visual_prompt"],
-    "g2_image_to_video": ["g_image_gen"],
-    "h_video_compose": ["d_tts_gen", "e_bgm_select", "f_subtitle_split", "g2_image_to_video"],
+    # g2_image_to_video 제거 — Ken Burns 효과로 대체 (비용 절감)
+    "h_video_compose": ["d_tts_gen", "e_bgm_select", "f_subtitle_split", "g_image_gen"],
     "i_thumbnail_gen": ["h_video_compose"],
     "j_metadata_gen": ["h_video_compose"],
     "k_monetization_desc": ["h_video_compose"],

@@ -326,11 +326,12 @@ def burn_subtitles(
         f"Bold=1"
     )
 
-    # Copy subtitle to a simple path to avoid escaping issues
+    # Copy subtitle to a simple ASCII-safe path to avoid Windows Korean path issues
     import shutil
-    import tempfile
 
-    tmp_dir = Path(tempfile.mkdtemp())
+    # Use the video's parent directory (project/video/) instead of system temp
+    tmp_dir = video_path.parent / "_sub_tmp"
+    tmp_dir.mkdir(exist_ok=True)
     tmp_srt = tmp_dir / "subs.srt"
     shutil.copy2(str(subtitle_path.resolve()), str(tmp_srt))
 
@@ -345,9 +346,9 @@ def burn_subtitles(
         for f in fonts_src.glob("*.ttf"):
             shutil.copy2(str(f), str(tmp_fonts / f.name))
 
-    # Use simple relative-style path from tmp dir
-    srt_escaped = str(tmp_srt).replace(":", "\\\\:")
-    fonts_escaped = str(tmp_fonts).replace(":", "\\\\:")
+    # Use forward slashes for ffmpeg path compatibility on Windows
+    srt_escaped = tmp_srt.resolve().as_posix().replace(":", "\\\\:")
+    fonts_escaped = tmp_fonts.resolve().as_posix().replace(":", "\\\\:")
     vf_filter = f"subtitles={srt_escaped}:fontsdir={fonts_escaped}:force_style='{style}'"
 
     result = subprocess.run(

@@ -30,7 +30,7 @@ def _build_orchestrator() -> PipelineOrchestrator:
     from src.pipeline.e_bgm_select import BGMSelectStage
     from src.pipeline.f_subtitle_split import SubtitleSplitStage
     from src.pipeline.g_image_gen import ImageGenStage
-    from src.pipeline.g2_image_to_video import ImageToVideoStage
+    # g2_image_to_video 제거 — Ken Burns 효과로 대체 (비용 절감)
     from src.pipeline.h_video_compose import VideoComposeStage
     from src.pipeline.i_thumbnail_gen import ThumbnailGenStage
     from src.pipeline.j_metadata_gen import MetadataGenStage
@@ -42,7 +42,7 @@ def _build_orchestrator() -> PipelineOrchestrator:
     for stage_cls in [
         ScriptGenStage, SceneSegmentStage, VisualPromptStage,
         TTSGenStage, BGMSelectStage, SubtitleSplitStage,
-        ImageGenStage, ImageToVideoStage, VideoComposeStage,
+        ImageGenStage, VideoComposeStage,
         ThumbnailGenStage, MetadataGenStage, MonetizationDescStage,
         ShortsTeaserStage, ExportPackageStage,
     ]:
