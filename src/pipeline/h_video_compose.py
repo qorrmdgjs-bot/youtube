@@ -12,7 +12,6 @@ from src.engines.ffmpeg_wrapper import (
     compose_final_video,
     concat_videos_with_transitions,
     ken_burns_scene,
-    mix_audio,
 )
 from src.engines.llm_client import PROJECT_ROOT
 from src.models import ProjectManifest, Script
@@ -44,7 +43,6 @@ def _ffprobe_duration(file_path: Path) -> float:
 
 class VideoComposeStage(BaseStage):
     name = "h_video_compose"
-    # e_bgm_select 제거 — BGM 영구 미사용. Ken Burns 합성 + 내레이션 단독.
     dependencies = ["d_tts_gen", "f_subtitle_split", "g_image_gen"]
 
     def execute(self, project_dir: Path, manifest: ProjectManifest) -> float:
@@ -58,7 +56,6 @@ class VideoComposeStage(BaseStage):
         scene_config = settings.get("scene", {})
         video_config = settings.get("video", {})
         subtitle_cfg = settings.get("subtitle", {})
-        audio_cfg = settings.get("audio", {})
 
         video_dir = project_dir / "video"
         video_dir.mkdir(exist_ok=True)
@@ -135,28 +132,16 @@ class VideoComposeStage(BaseStage):
                 transition_duration=scene_config.get("transition_duration_sec", 0.5),
             )
 
-        # Step 3: Mix audio (narration + BGM)
-        self.log.info("step_audio_mix_start")
+        # Step 3: Use narration as the audio track (BGM permanently disabled).
+        self.log.info("step_audio_prep_start")
         narration_path = project_dir / "audio" / "narration_full.mp3"
-        bgm_path = project_dir / "audio" / "bgm.mp3"
         mixed_audio_path = project_dir / "audio" / "mixed.mp3"
 
         if not narration_path.exists():
             raise RuntimeError(f"내레이션 오디오 파일이 없습니다: {narration_path}")
 
-        if bgm_path.exists():
-            mix_audio(
-                narration_path=narration_path,
-                bgm_path=bgm_path,
-                output_path=mixed_audio_path,
-                narration_db=audio_cfg.get("narration_db", -3),
-                bgm_db=audio_cfg.get("bgm_db", -15),
-                fade_out_sec=audio_cfg.get("fade_out_sec", 3.0),
-            )
-        else:
-            # No BGM, use narration only
-            import shutil
-            shutil.copy2(narration_path, mixed_audio_path)
+        import shutil
+        shutil.copy2(narration_path, mixed_audio_path)
 
         # Step 4: Combine video + audio
         self.log.info("step_compose_start")

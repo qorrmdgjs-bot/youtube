@@ -33,8 +33,6 @@ def _build_orchestrator() -> PipelineOrchestrator:
     from src.pipeline.d_tts_gen import TTSGenStage
     from src.pipeline.f_subtitle_split import SubtitleSplitStage
     from src.pipeline.g_image_gen import ImageGenStage
-    # e_bgm_select 제거 (2026-04-26) — BGM을 영구적으로 사용하지 않음.
-    # g2_image_to_video 제거 — Ken Burns 효과로 대체.
     from src.pipeline.h_video_compose import VideoComposeStage
     from src.pipeline.i_thumbnail_gen import ThumbnailGenStage
     from src.pipeline.j_metadata_gen import MetadataGenStage

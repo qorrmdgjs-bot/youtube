@@ -14,13 +14,6 @@ video:
   audio_bitrate: "192k"
   default_duration_sec: 480    # 8 minutes (seniors prefer 8-12min)
 
-# Audio mixing
-audio:
-  narration_db: -3
-  bgm_db: -3               # louder for senior hearing
-  fade_in_sec: 1.5
-  fade_out_sec: 3.0
-
 # Subtitle (landscape main video 1920x1080)
 subtitle:
   font: "NanumSquareRoundEB"

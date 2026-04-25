@@ -199,8 +199,8 @@ youtube/
 │   ├── settings.yaml
 │   ├── emotional_arcs.yaml
 │   ├── character_templates.yaml  # 가족 유형 → 인물 → 이미지 (멀티 stage 스키마)
-│   ├── safety_rules.yaml, bgm_library.yaml, timing_curves.yaml,
-│   ├── font_config.yaml, cta_templates.yaml, monetization_blocks.yaml
+│   ├── cta_templates.yaml, monetization_blocks.yaml
+│   └── safety_rules.yaml         # 정책 참조 (현재 코드에서 미와이어, 향후 LLM 프롬프트에 통합 가능)
 │
 ├── src/
 │   ├── cli.py              # `series episode` 서브커맨드 Phase 3에서 추가

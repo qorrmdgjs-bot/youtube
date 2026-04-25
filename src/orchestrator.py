@@ -11,9 +11,9 @@ from src.utils.logging_setup import get_logger
 
 log = get_logger(__name__)
 
-# Stage dependency graph
-# - e_bgm_select 제거 (2026-04-26): BGM을 영구적으로 사용하지 않음. 내레이션 단독.
-# - g2_image_to_video 제거: Ken Burns 효과로 대체.
+# Stage dependency graph (12 stages: A,B,C,D,F,G,H,I,J,K,L,M).
+# E (BGM) and G2 (AI image-to-video) intentionally absent — narration only,
+# Ken Burns for visual movement.
 STAGE_DEPS: dict[str, list[str]] = {
     "a_script_gen": [],
     "b_scene_segment": ["a_script_gen"],

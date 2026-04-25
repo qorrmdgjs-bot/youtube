@@ -12,9 +12,7 @@ from src.utils.logging_setup import get_logger
 
 log = get_logger(__name__)
 
-# Pipeline stages in execution order
-# - e_bgm_select 제거 (2026-04-26) — BGM 영구 미사용
-# - g2_image_to_video 제거 — Ken Burns 효과로 대체
+# Pipeline stages in execution order. See src/orchestrator.py for the dep graph.
 ALL_STAGES = [
     "a_script_gen",
     "b_scene_segment",
