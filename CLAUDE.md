@@ -97,15 +97,18 @@ python scripts/generate_characters.py --family-type parent_sacrifice --yes
 
 **비용**: ~$0.60 (15장 × $0.04). 결과는 `assets/characters/parent_sacrifice/` 에 추가.
 
-### ⏳ Phase 2 — 시리즈 바이블 작성 (간소화됨)
+### ✅ Phase 2 — 에피소드 매핑 YAML (간소화 + 완료)
 
-당초 계획: 사용자 synopsis → Claude API → 10 사건 도출.
-**변경**: 사용자가 이미 3 POV 스토리를 작성했으므로, **마크다운 → YAML 변환**만 필요.
+당초 계획은 풀 시리즈 바이블 YAML이었으나, 마크다운이 이미 강한 source-of-truth라 **매핑 YAML만** 만드는 방향으로 축소.
 
-**산출물**: `series/our_family.yaml`
-- 10 events × 시점 (아들/아빠/엄마, 존재하는 것만)
-- 각 사건의 `core_facts`, `son_pov`, `father_pov`(있으면), `mother_pov`(있으면), `characters_present` (4단계 stage ID)
-- 새 스크립트 `scripts/build_series_bible.py` (마크다운 파서, LLM 호출 불필요 또는 매우 적음)
+**산출물**: [series/our_family.yaml](series/our_family.yaml) — 22 에피소드 매핑 표 (스토리 본문 X, episode → event/POV/characters/age 매핑만)
+
+**파이프라인 동작 흐름**:
+1. CLI에서 `--episode N` 받으면 `our_family.yaml`에서 metadata 룩업
+2. `pov_files[perspective]` 마크다운 파일 열기
+3. "## 사건 {event_idx}" 헤딩 섹션 추출
+4. 마크다운 + `series_overview.md` 글로벌 컨텍스트로 LLM에 그대로 주입
+5. `characters` 매핑은 `character_templates.yaml`에서 이미지 경로 룩업 → Nano Banana 2 image_input
 
 ### ⏳ Phase 3 — 데이터 모델 + 시리즈 모드 + Nano Banana 통합
 
@@ -190,7 +193,7 @@ youtube/
 ├── series/                 # 시리즈 자산 (north star)
 │   ├── prompts/            # 외부 AI 프롬프트 (아카이브)
 │   ├── drafts/             # 3 POV 스토리 정본 + overview ⭐
-│   └── our_family.yaml     # Phase 2에서 생성 예정
+│   └── our_family.yaml     # 22 에피소드 매핑 (스토리 본문 X, 매핑만)
 │
 ├── config/                 # YAML 설정
 │   ├── settings.yaml
