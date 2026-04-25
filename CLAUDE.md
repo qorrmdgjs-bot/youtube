@@ -229,17 +229,18 @@ youtube/
 ## 파이프라인 DAG (현재 13단계, Phase 3-5에서 보강)
 
 ```
-A) 스크립트 (Claude API; Phase 3에서 시리즈 컨텍스트 + POV 가이드 주입)
-  → B) 장면 분할 (Phase 5에서 climax 침묵 2.0초)
-    ├─→ C) 시각 프롬프트 (Phase 3에서 등장 인물 role + stage 추출)
-    ├─→ D) TTS (ElevenLabs Haechan)
-    ├─→ E) BGM (Lullaby for the Lost)
-    └─→ F) 자막 (TTS 동기화)
-  → G) 이미지 (Phase 3에서 FLUX → Nano Banana 2 + 캐릭터 image_input)
+A) 스크립트 (Claude API; 시리즈 모드: POV 가이드 + 마크다운 컨텍스트 주입)
+  → B) 장면 분할 (climax 직전 2.0초 침묵 자동 마킹)
+    ├─→ C) 시각 프롬프트 (영문, 한국 웹툰 스타일)
+    ├─→ D) TTS (ElevenLabs Haechan, 한글)
+    └─→ F) 자막 (TTS 동기화, 한글)
+  → G) 이미지 (Nano Banana 2 + 캐릭터 시트 image_input — 시리즈 모드)
     → G2) Veo 3.1 영상 (Phase 4에서 부활, climax만)
-      → H) FFmpeg 합성 (Veo 클립 우선 + Ken Burns 폴백)
+      → H) FFmpeg 합성 (Ken Burns + 내레이션 + 자막 번인, BGM 없음)
         → I/J/K/L (썸네일/메타/수익화/쇼츠)
           → M) 패키징
+
+> **E 단계 (BGM 선택) 제거** (2026-04-26): BGM을 영구적으로 사용하지 않음. 내레이션과 자연 소리만으로 정서 전달. 12단계 파이프라인.
 ```
 
 ## 시리즈 모드 사용법 (Phase 3 완료 후)
@@ -262,7 +263,7 @@ python -m src.cli series episode --bible series/our_family.yaml --episode 1
 | Key scene 영상 | Veo 3.1 (Phase 4), climax phase만 |
 | 일반 장면 | Ken Burns 6방향 폴백 |
 | 오디오 | 44.1kHz, EQ (250Hz 부스트 + 4kHz 컷), -16 LUFS |
-| BGM | -3dB, 처음~끝 + 페이드아웃, 단일곡 (Lullaby for the Lost) |
+| BGM | **사용 안 함** (2026-04-26 영구 제거) — 내레이션 단독 |
 | 침묵 | climax 직전 **2.0초** (Phase 5) |
 | 자막 | 17px, 반투명 검정 배경, NanumSquareRoundEB |
 | 인코딩 | H.264 CRF 23, medium |

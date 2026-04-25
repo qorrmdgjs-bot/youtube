@@ -21,7 +21,7 @@ audio:
   fade_in_sec: 1.5
   fade_out_sec: 3.0
 
-# Subtitle
+# Subtitle (landscape main video 1920x1080)
 subtitle:
   font: "NanumSquareRoundEB"
   font_size: 22
@@ -32,6 +32,15 @@ subtitle:
   position_y_percent: 85  # bottom 15%
   max_chars_per_line: 18
   max_syllables_per_sec: 3.5
+
+# Shorts (1080x1920 portrait, 60s clips)
+shorts:
+  target_duration_sec: 60      # ~1 minute per short
+  min_duration_sec: 45
+  max_duration_sec: 70
+  subtitle_font_size: 64       # larger for portrait/mobile readability
+  subtitle_margin_v: 240       # bottom margin (px) for portrait
+  source_video: "composed.mp4" # use pre-subtitle composed video so we can re-burn larger subs
 
 # Scene
 scene:

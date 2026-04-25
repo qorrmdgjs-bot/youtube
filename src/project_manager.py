@@ -13,15 +13,15 @@ from src.utils.logging_setup import get_logger
 log = get_logger(__name__)
 
 # Pipeline stages in execution order
+# - e_bgm_select 제거 (2026-04-26) — BGM 영구 미사용
+# - g2_image_to_video 제거 — Ken Burns 효과로 대체
 ALL_STAGES = [
     "a_script_gen",
     "b_scene_segment",
     "c_visual_prompt",
     "d_tts_gen",
-    "e_bgm_select",
     "f_subtitle_split",
     "g_image_gen",
-    # g2_image_to_video 제거 — Ken Burns 효과로 대체
     "h_video_compose",
     "i_thumbnail_gen",
     "j_metadata_gen",
