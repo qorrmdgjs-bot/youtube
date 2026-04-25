@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from src.models import EndingType, FamilyType, ProjectBrief, StageStatus
 from src.project_manager import ALL_STAGES, create_project, list_projects, load_manifest
 from src.orchestrator import PipelineOrchestrator
+from src.series_loader import PROJECT_ROOT as SERIES_PROJECT_ROOT, build_episode_brief
 from src.utils.logging_setup import setup_logging
 
 load_dotenv()
@@ -19,6 +20,9 @@ app = typer.Typer(
     help="YouTube 장편 자동화 파이프라인",
     no_args_is_help=True,
 )
+
+series_app = typer.Typer(name="series", help="시리즈 모드 (가족 드라마 22화 시리즈)", no_args_is_help=True)
+app.add_typer(series_app, name="series")
 
 
 def _build_orchestrator() -> PipelineOrchestrator:
@@ -235,6 +239,63 @@ def cost(
 
     typer.echo("-" * 60)
     typer.echo(f"전체 합계: ${total_cost:.2f}")
+
+
+@series_app.command("episode")
+def series_episode(
+    episode: int = typer.Option(..., "--episode", "-e", help="에피소드 번호 (1-22)"),
+    bible: str = typer.Option("series/our_family.yaml", "--bible", "-b", help="시리즈 바이블 YAML 경로"),
+    duration: int = typer.Option(300, "--duration", "-d", help="목표 길이(초)"),
+    voice: str = typer.Option("male", "--voice", "-v", help="음성 성별 (female/male)"),
+    base_dir: str = typer.Option("projects", "--dir", help="프로젝트 베이스 디렉토리"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="ProjectBrief만 만들고 출력. 프로젝트/파이프라인 생성 안함"),
+    no_run: bool = typer.Option(False, "--no-run", help="프로젝트 생성만, 파이프라인 미실행"),
+) -> None:
+    """시리즈 바이블에서 에피소드 한 편을 만들어 파이프라인 실행."""
+    setup_logging()
+
+    bible_path = Path(bible)
+    if not bible_path.is_absolute():
+        bible_path = SERIES_PROJECT_ROOT / bible
+    if not bible_path.exists():
+        typer.echo(f"❌ 바이블 파일 없음: {bible_path}", err=True)
+        raise typer.Exit(1)
+
+    try:
+        brief = build_episode_brief(
+            bible_path,
+            episode_number=episode,
+            target_duration_sec=duration,
+            voice_gender=voice,
+        )
+    except (ValueError, FileNotFoundError) as e:
+        typer.echo(f"❌ 에피소드 빌드 실패: {e}", err=True)
+        raise typer.Exit(1)
+
+    typer.echo(f"📺 ep{episode} — {brief.title}")
+    typer.echo(f"   사건 {brief.event_idx} · {brief.perspective}")
+    typer.echo(f"   등장 가족: {brief.characters_in_episode}")
+    typer.echo(f"   컨텍스트 길이: {len(brief.series_context_md or '')} chars (markdown)")
+    typer.echo(f"   overview 길이: {len(brief.series_overview_md or '')} chars")
+
+    if dry_run:
+        typer.echo("\n--- synopsis ---")
+        typer.echo(brief.synopsis)
+        typer.echo("\n--- series_context_md (앞 600자) ---")
+        ctx = brief.series_context_md or ""
+        typer.echo(ctx[:600] + ("…" if len(ctx) > 600 else ""))
+        return
+
+    project_dir, manifest = create_project(base_dir, brief)
+    typer.echo(f"\n   프로젝트 생성: {project_dir}")
+    typer.echo(f"   ID: {manifest.project_id}")
+
+    if no_run:
+        return
+
+    orchestrator = _build_orchestrator()
+    manifest = orchestrator.run(project_dir)
+    typer.echo(f"\n✨ 파이프라인 완료. 비용: ${manifest.total_cost_usd:.2f}")
 
 
 def main() -> None:
