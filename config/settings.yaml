@@ -38,8 +38,11 @@ shorts:
   target_duration_sec: 60      # ~1 minute per short
   min_duration_sec: 45
   max_duration_sec: 70
-  subtitle_font_size: 64       # larger for portrait/mobile readability
-  subtitle_margin_v: 240       # bottom margin (px) for portrait
+  # libass interprets these in 384x288 PlayRes coords for SRT-converted subs;
+  # values × ~6.67 = effective px on the 1080x1920 frame.
+  # Fontsize=18 ≈ 120px tall text; MarginV=25 ≈ 167px from bottom.
+  subtitle_font_size: 18
+  subtitle_margin_v: 25
   source_video: "composed.mp4" # use pre-subtitle composed video so we can re-burn larger subs
 
 # Scene
