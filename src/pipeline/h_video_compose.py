@@ -73,7 +73,10 @@ class VideoComposeStage(BaseStage):
         n_scenes = len(script.scenes)
 
         for i, scene in enumerate(script.scenes):
-            image_path = scenes_dir / f"scene_{scene.index:03d}.png"
+            # Image is shared across all sub-scenes that have the same image_key,
+            # so look it up by the group key. Audio + clip stay per-scene.
+            image_key = scene.image_key if scene.image_key is not None else scene.index
+            image_path = scenes_dir / f"scene_{image_key:03d}.png"
             clip_path = video_dir / f"clip_{scene.index:03d}.mp4"
             audio_path = audio_dir / f"scene_{scene.index:03d}.mp3"
 

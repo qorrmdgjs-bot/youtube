@@ -45,10 +45,14 @@ class SceneSegmentStage(BaseStage):
                 )
                 scene.duration_sec = round(min_duration, 1)
 
-            # Split long scenes into sub-scenes for more images
+            # Split long scenes into sub-scenes for narration timing.
+            # All sub-scenes share image_key (= first sub's index) so stage G generates
+            # ONE image for the group; ken_burns then varies camera movement per sub-scene.
             if scene.duration_sec > MAX_SCENE_DURATION_FOR_SINGLE_IMAGE:
                 sub_scenes = self._split_scene(scene, new_index)
+                group_key = new_index  # parent group identifier
                 for sub in sub_scenes:
+                    sub.image_key = group_key
                     if sub.phase == "climax" and not sub.has_silence_before:
                         sub.has_silence_before = True
                         sub.silence_duration_sec = 1.5
@@ -58,9 +62,11 @@ class SceneSegmentStage(BaseStage):
                     "scene_split",
                     original_index=scene.index,
                     sub_count=len(sub_scenes),
+                    image_key=group_key,
                 )
             else:
                 scene.index = new_index
+                scene.image_key = new_index  # standalone scene is its own group
                 if scene.phase == "climax" and not scene.has_silence_before:
                     scene.has_silence_before = True
                     scene.silence_duration_sec = 1.5

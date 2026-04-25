@@ -107,6 +107,15 @@ class Scene(BaseModel):
         default_factory=list,
         description="Subset of episode characters appearing in this scene (role_id list, e.g., ['father', 'son'])",
     )
+    image_key: int | None = Field(
+        default=None,
+        description=(
+            "Group key for image sharing. Sub-scenes split from the same original LLM scene "
+            "share an image_key, so stage G generates ONE image for the group and stage H "
+            "applies different Ken Burns directions per sub-scene to create movement instead "
+            "of cutting between visually similar shots."
+        ),
+    )
 
 
 class Script(BaseModel):

@@ -260,6 +260,7 @@ python -m src.cli series episode --bible series/our_family.yaml --episode 1
 | 기본 길이 | 5분 |
 | 이미지 | Nano Banana 2 (Phase 3 적용 예정), 한국 웹툰, 어스톤 + 파스텔 + 골든 |
 | 캐릭터 일관성 | image_input reference (장면별 등장 인물 stage 시트 첨부) |
+| 이미지 그룹화 | 1개 LLM 장면 = 1장 이미지 (서브씬 공유). Ken Burns 6방향으로 변주 — 비슷한 이미지 연속 절사 방지 |
 | Key scene 영상 | Veo 3.1 (Phase 4), climax phase만 |
 | 일반 장면 | Ken Burns 6방향 폴백 |
 | 오디오 | 44.1kHz, EQ (250Hz 부스트 + 4kHz 컷), -16 LUFS |

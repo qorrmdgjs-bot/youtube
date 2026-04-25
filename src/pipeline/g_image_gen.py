@@ -46,22 +46,26 @@ class ImageGenStage(BaseStage):
         client_accepts_refs = client.__class__.__name__ == "NanoBananaClient"
         total_cost = 0.0
 
+        # Generate ONE image per unique image_key (sibling sub-scenes share an image,
+        # which Stage H then varies via Ken Burns to create movement instead of cuts).
+        # If image_key is None (legacy projects, pre-2026-04-26), fall back to scene.index.
         for scene in script.scenes:
-            output_path = project_dir / "scenes" / f"scene_{scene.index:03d}.png"
+            key = scene.image_key if scene.image_key is not None else scene.index
+            output_path = project_dir / "scenes" / f"scene_{key:03d}.png"
             if output_path.exists():
-                self.log.info("image_exists_skip", scene=scene.index)
+                self.log.info("image_exists_skip", scene=scene.index, image_key=key)
                 continue
 
             prompt = scene.visual_prompt or scene.visual_description or scene.dialogue
 
-            kwargs: dict = {"prompt": prompt, "output_path": output_path, "seed": scene.index * 1000}
+            kwargs: dict = {"prompt": prompt, "output_path": output_path, "seed": key * 1000}
             if client_accepts_refs and reference_images:
                 kwargs["reference_images"] = reference_images
 
             cost = client.generate(**kwargs)
             total_cost += cost
 
-            self.log.info("image_generated", scene=scene.index, cost=cost)
+            self.log.info("image_generated", scene=scene.index, image_key=key, cost=cost)
 
         self.log.info("image_gen_complete", scenes=len(script.scenes), cost=total_cost)
         return total_cost
