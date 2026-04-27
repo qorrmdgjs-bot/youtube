@@ -17,6 +17,9 @@ from src.utils.hangul_utils import estimate_reading_duration
 # Maximum narration seconds before a scene should be split into sub-scenes
 MAX_SCENE_DURATION_FOR_SINGLE_IMAGE = 15.0
 
+# Silence beat inserted before climax scenes (mirrors config/emotional_arcs.yaml)
+SILENCE_BEFORE_CLIMAX_SEC = 2.0
+
 
 class SceneSegmentStage(BaseStage):
     name = "b_scene_segment"
@@ -55,7 +58,7 @@ class SceneSegmentStage(BaseStage):
                     sub.image_key = group_key
                     if sub.phase == "climax" and not sub.has_silence_before:
                         sub.has_silence_before = True
-                        sub.silence_duration_sec = 1.5
+                        sub.silence_duration_sec = SILENCE_BEFORE_CLIMAX_SEC
                     expanded_scenes.append(sub)
                     new_index += 1
                 self.log.info(
@@ -69,7 +72,7 @@ class SceneSegmentStage(BaseStage):
                 scene.image_key = new_index  # standalone scene is its own group
                 if scene.phase == "climax" and not scene.has_silence_before:
                     scene.has_silence_before = True
-                    scene.silence_duration_sec = 1.5
+                    scene.silence_duration_sec = SILENCE_BEFORE_CLIMAX_SEC
                 expanded_scenes.append(scene)
                 new_index += 1
 
