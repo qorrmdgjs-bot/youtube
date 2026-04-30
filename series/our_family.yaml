@@ -16,11 +16,13 @@ series:
 
   drafts_dir: series/drafts
   overview: series_overview.md   # always inject as global context
+  # v4 (2026-04-30 확정): 단일 화자(아들) 통합 디테일 시나리오. 영상 제작의 source-of-truth.
+  scenario: full_scenario_v4.md   # "### EP{n}." 헤딩으로 에피소드 단위 섹션 분리
+  # 1차 정본 (아카이브, fallback용). v4가 우선.
   pov_files:
     son: son_pov_stories.md
     father: father_pov_stories.md
     mother: mother_pov_stories.md
-  # 각 마크다운 파일은 "## 사건 N: <title>" 헤딩으로 섹션 분리.
 
 # ─────────────────────────────────────────────────
 # 22 episodes (시간 순 + 시점 순)

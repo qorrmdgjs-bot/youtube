@@ -38,7 +38,10 @@ def get_episode_entry(series_data: dict, episode_number: int) -> dict:
 
 
 def extract_event_section(markdown_path: Path, event_idx: int) -> str:
-    """Return the markdown block under '## 사건 {event_idx}: …' until the next '## 사건' heading."""
+    """Return the markdown block under '## 사건 {event_idx}: …' until the next '## 사건' heading.
+
+    Used for the legacy 1차 정본 POV files (son/father/mother_pov_stories.md).
+    """
     text = markdown_path.read_text(encoding="utf-8")
     lines = text.split("\n")
 
@@ -62,8 +65,47 @@ def extract_event_section(markdown_path: Path, event_idx: int) -> str:
     return "\n".join(lines[start:end]).rstrip()
 
 
+def extract_episode_section_v4(scenario_path: Path, episode_number: int) -> str:
+    """Return the markdown block under '### EP{n}. …' until the next '### EP' or '## ' heading.
+
+    Used for the v4 unified scenario (full_scenario_v4.md), which has per-episode sections.
+    """
+    text = scenario_path.read_text(encoding="utf-8")
+    lines = text.split("\n")
+
+    start: int | None = None
+    end = len(lines)
+    target_pattern = re.compile(rf"^###\s+EP{episode_number}\.\s")
+    next_episode_pattern = re.compile(r"^###\s+EP\d+\.\s")
+    next_section_pattern = re.compile(r"^##\s+")
+
+    for i, line in enumerate(lines):
+        if start is None and target_pattern.match(line):
+            start = i
+            continue
+        if start is not None and (next_episode_pattern.match(line) or next_section_pattern.match(line)):
+            end = i
+            break
+
+    if start is None:
+        raise ValueError(f"'EP{episode_number}' 섹션을 {scenario_path.name} 에서 찾을 수 없습니다.")
+
+    return "\n".join(lines[start:end]).rstrip()
+
+
 def _extract_story_summary(markdown_section: str) -> str:
-    """Pull the '줄거리' bullet content for ProjectBrief.synopsis (≤1000 chars)."""
+    """Pull a synopsis (≤1000 chars) from either the v4 후킹 block or the legacy 줄거리 bullet."""
+    # v4 format: "**🎞️ 후킹**\n> ..." blockquote paragraph
+    hook_match = re.search(
+        r"\*\*🎞️\s*후킹\*\*\s*\n((?:>.*\n?)+)",
+        markdown_section,
+    )
+    if hook_match:
+        hook_lines = hook_match.group(1).strip().split("\n")
+        cleaned = " ".join(line.lstrip("> ").strip() for line in hook_lines if line.strip())
+        return cleaned[:1000]
+
+    # Legacy format: "**줄거리**: ..."
     match = re.search(
         r"\*\*줄거리[^*]*\*\*\s*:\s*(.+?)(?=\n\s*-\s+\*\*|\n\n##|\Z)",
         markdown_section,
@@ -75,7 +117,7 @@ def _extract_story_summary(markdown_section: str) -> str:
     # Fallback: first non-heading paragraph
     for line in markdown_section.split("\n"):
         clean = line.strip()
-        if clean and not clean.startswith(("#", "**후킹", ">")):
+        if clean and not clean.startswith(("#", "**", ">")):
             return clean[:1000]
     return markdown_section[:1000]
 
@@ -94,11 +136,19 @@ def build_episode_brief(
 
     drafts_dir = PROJECT_ROOT / series_meta["drafts_dir"]
     perspective: str = episode["perspective"]
-    pov_file = drafts_dir / series_meta["pov_files"][perspective]
     overview_file = drafts_dir / series_meta["overview"]
-
     event_idx: int = episode["event_idx"]
-    series_context_md = extract_event_section(pov_file, event_idx)
+
+    # Prefer v4 unified scenario when configured (per-episode section).
+    # Fall back to legacy POV files (per-event section) if scenario field is absent.
+    scenario_filename = series_meta.get("scenario")
+    if scenario_filename:
+        scenario_file = drafts_dir / scenario_filename
+        series_context_md = extract_episode_section_v4(scenario_file, episode_number)
+    else:
+        pov_file = drafts_dir / series_meta["pov_files"][perspective]
+        series_context_md = extract_event_section(pov_file, event_idx)
+
     series_overview_md = overview_file.read_text(encoding="utf-8")
 
     pov_label = PERSPECTIVE_LABELS[perspective]
