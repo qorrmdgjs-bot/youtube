@@ -370,7 +370,7 @@ arcs:
 retention:
   curiosity_gap_interval_sec: 20
   emotional_reversal_position: 0.55  # 55% of video
-  silence_before_climax_sec: 1.5
+  silence_before_climax_sec: 2.0
   min_scene_duration_sec: 3.0
   senior_reading_speed_syllables_per_sec: 3.5
   subtitle_font_size_min: 48

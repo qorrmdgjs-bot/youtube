@@ -17,6 +17,9 @@ from src.utils.hangul_utils import estimate_reading_duration
 # Maximum narration seconds before a scene should be split into sub-scenes
 MAX_SCENE_DURATION_FOR_SINGLE_IMAGE = 15.0
 
+# Silence beat inserted before climax scenes (mirrors config/emotional_arcs.yaml)
+SILENCE_BEFORE_CLIMAX_SEC = 2.0
+
 
 class SceneSegmentStage(BaseStage):
     name = "b_scene_segment"
@@ -45,25 +48,31 @@ class SceneSegmentStage(BaseStage):
                 )
                 scene.duration_sec = round(min_duration, 1)
 
-            # Split long scenes into sub-scenes for more images
+            # Split long scenes into sub-scenes for narration timing.
+            # All sub-scenes share image_key (= first sub's index) so stage G generates
+            # ONE image for the group; ken_burns then varies camera movement per sub-scene.
             if scene.duration_sec > MAX_SCENE_DURATION_FOR_SINGLE_IMAGE:
                 sub_scenes = self._split_scene(scene, new_index)
+                group_key = new_index  # parent group identifier
                 for sub in sub_scenes:
+                    sub.image_key = group_key
                     if sub.phase == "climax" and not sub.has_silence_before:
                         sub.has_silence_before = True
-                        sub.silence_duration_sec = 1.5
+                        sub.silence_duration_sec = SILENCE_BEFORE_CLIMAX_SEC
                     expanded_scenes.append(sub)
                     new_index += 1
                 self.log.info(
                     "scene_split",
                     original_index=scene.index,
                     sub_count=len(sub_scenes),
+                    image_key=group_key,
                 )
             else:
                 scene.index = new_index
+                scene.image_key = new_index  # standalone scene is its own group
                 if scene.phase == "climax" and not scene.has_silence_before:
                     scene.has_silence_before = True
-                    scene.silence_duration_sec = 1.5
+                    scene.silence_duration_sec = SILENCE_BEFORE_CLIMAX_SEC
                 expanded_scenes.append(scene)
                 new_index += 1
 

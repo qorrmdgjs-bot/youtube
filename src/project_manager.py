@@ -12,17 +12,15 @@ from src.utils.logging_setup import get_logger
 
 log = get_logger(__name__)
 
-# Pipeline stages in execution order
+# Pipeline stages in execution order. See src/orchestrator.py for the dep graph.
 ALL_STAGES = [
     "a_script_gen",
     "b_scene_segment",
     "c_visual_prompt",
     "c2_character_sheet",
     "d_tts_gen",
-    "e_bgm_select",
     "f_subtitle_split",
     "g_image_gen",
-    "g2_image_to_video",  # Veo 3.1 핵심 장면만 (2026-04-24)
     "h_video_compose",
     "i_thumbnail_gen",
     "j_metadata_gen",

@@ -1,4 +1,4 @@
-"""Factory for image/video engine selection with automatic fallback."""
+"""Factory for image engine selection with automatic fallback."""
 
 from __future__ import annotations
 
@@ -18,17 +18,6 @@ class ImageClientProtocol(Protocol):
         output_path: Path,
         ref_images: list[Path] | None = None,
         seed: int | None = None,
-    ) -> float: ...
-
-
-class VideoClientProtocol(Protocol):
-    def generate(
-        self,
-        image_path: Path,
-        output_path: Path,
-        prompt: str = "",
-        duration_sec: int = 6,
-        ref_images: list[Path] | None = None,
     ) -> float: ...
 
 
@@ -106,34 +95,3 @@ def get_image_client(settings: dict | None = None) -> Any:
     if len(clients) == 1:
         return clients[0]
     return _ImageClientWithFallback(clients)
-
-
-def get_video_client(settings: dict | None = None) -> Any | None:
-    """Return a video client according to settings, or None for Ken Burns only.
-
-    settings["video_engine"] = "veo_selective" | "veo_all" | "ken_burns" (default: "ken_burns")
-    Returns None if ken_burns mode (no AI video client needed).
-    """
-    engine = "ken_burns"
-    if settings:
-        engine = settings.get("video_engine", {}).get("engine", engine)
-
-    if engine == "ken_burns":
-        return None
-
-    if engine in ("veo_selective", "veo_all") and os.environ.get("GOOGLE_GENAI_API_KEY"):
-        try:
-            from src.engines.veo_video_client import VeoVideoClient
-            return VeoVideoClient()
-        except Exception as e:
-            log.warning("veo_client_init_failed_fallback_wan", error=str(e))
-
-    if os.environ.get("REPLICATE_API_TOKEN"):
-        try:
-            from src.engines.video_gen_client import ImageToVideoClient
-            return ImageToVideoClient()
-        except Exception as e:
-            log.warning("wan_client_init_failed", error=str(e))
-
-    log.warning("no_video_api_keys, video engine disabled (ken_burns only)")
-    return None

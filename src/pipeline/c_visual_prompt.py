@@ -107,9 +107,22 @@ class VisualPromptStage(BaseStage):
         char_desc = "\n".join(f"- {role}: {desc}" for role, desc in characters.items())
 
         total_cost = 0.0
+        # Cache visual_prompts keyed by image_key so sub-scenes split from the same
+        # original LLM scene reuse a single prompt (and downstream a single image).
+        prompt_cache: dict[int, str] = {}
 
         for scene in script.scenes:
             if scene.visual_prompt:
+                continue
+
+            # Sub-scene of an already-processed group → reuse the group's prompt
+            if scene.image_key is not None and scene.image_key in prompt_cache:
+                scene.visual_prompt = prompt_cache[scene.image_key]
+                self.log.info(
+                    "visual_prompt_reused",
+                    scene=scene.index,
+                    image_key=scene.image_key,
+                )
                 continue
 
             description = scene.visual_description or scene.dialogue
@@ -151,33 +164,16 @@ class VisualPromptStage(BaseStage):
             except (json.JSONDecodeError, KeyError):
                 scene.visual_prompt = STYLE_PREFIX + f"{scene.emotion}, {description}"
 
+            # Cache for sibling sub-scenes
+            if scene.image_key is not None and scene.visual_prompt:
+                prompt_cache[scene.image_key] = scene.visual_prompt
+
             self.log.info(
                 "visual_prompt_extracted",
                 scene=scene.index,
+                image_key=scene.image_key,
                 prompt_len=len(scene.visual_prompt),
             )
-
-        # Flag key scenes for AI video generation (G2 stage)
-        video_cfg = settings.get("video_engine", {})
-        ai_emotions = {e.lower() for e in video_cfg.get("ai_video_emotions", [])}
-        ai_phases = {p.lower() for p in video_cfg.get("ai_video_phases", [])}
-        engine_mode = video_cfg.get("engine", "ken_burns")
-        if engine_mode == "veo_all":
-            for scene in script.scenes:
-                scene.use_ai_video = True
-        elif engine_mode == "veo_selective":
-            for scene in script.scenes:
-                emotion_hit = (scene.emotion or "").lower() in ai_emotions
-                phase_hit = (scene.phase or "").lower() in ai_phases
-                scene.use_ai_video = emotion_hit or phase_hit
-
-        ai_count = sum(1 for s in script.scenes if s.use_ai_video)
-        self.log.info(
-            "ai_video_scenes_flagged",
-            engine=engine_mode,
-            count=ai_count,
-            total=len(script.scenes),
-        )
 
         # Save updated script
         (project_dir / "script.json").write_text(

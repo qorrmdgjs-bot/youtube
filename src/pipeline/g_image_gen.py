@@ -1,4 +1,10 @@
-"""Stage G: Image generation for each scene using visual prompts."""
+"""Stage G: Image generation for each scene using visual prompts.
+
+Uses engine_factory to pick the image client (Gemini Nano Banana 2 → FLUX → placeholder).
+Reference images come from manifest.character_refs (populated by stage C2).
+Sub-scenes that share an image_key share a single generated image; stage H then
+varies them via Ken Burns to create movement instead of cuts.
+"""
 
 from __future__ import annotations
 
@@ -32,10 +38,11 @@ class ImageGenStage(BaseStage):
             ref_image_paths.extend(Path(p) for p in paths)
 
         for scene in script.scenes:
-            output_path = project_dir / "scenes" / f"scene_{scene.index:03d}.png"
+            key = scene.image_key if scene.image_key is not None else scene.index
+            output_path = project_dir / "scenes" / f"scene_{key:03d}.png"
 
             if output_path.exists():
-                self.log.info("image_exists_skip", scene=scene.index)
+                self.log.info("image_exists_skip", scene=scene.index, image_key=key)
                 continue
 
             prompt = scene.visual_prompt or scene.visual_description or scene.dialogue
@@ -43,11 +50,11 @@ class ImageGenStage(BaseStage):
                 prompt=prompt,
                 output_path=output_path,
                 ref_images=ref_image_paths or None,
-                seed=scene.index * 1000,
+                seed=key * 1000,
             )
             total_cost += cost
 
-            self.log.info("image_generated", scene=scene.index, cost=cost)
+            self.log.info("image_generated", scene=scene.index, image_key=key, cost=cost)
 
         self.log.info("image_gen_complete", scenes=len(script.scenes), cost=total_cost)
         return total_cost

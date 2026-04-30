@@ -1,0 +1,236 @@
+# 시리즈 에피소드 매핑 표 (22화)
+# 본 파일은 episode_number → (event, perspective, characters) 매핑만 담당.
+# 스토리 본문은 이 파일이 아니라 series/drafts/{son,father,mother}_pov_stories.md를 source-of-truth로 사용.
+# 영상 제작 시 pipeline 코드는 다음 흐름으로 동작:
+#   1. 이 파일에서 episode N의 metadata + characters 룩업
+#   2. perspective에 매핑된 마크다운 파일 열어 "## 사건 {event_idx}: ..." 섹션 추출
+#   3. 추출된 마크다운 + series_overview.md를 LLM 프롬프트에 그대로 주입
+#   4. characters 매핑은 character_templates.yaml에서 이미지 경로 룩업해 Nano Banana 2 image_input으로 사용
+
+series:
+  id: our_family
+  title: "우리 가족, 30년"
+  family_type: parent_sacrifice
+  perspectives: [son, father, mother]
+  total_episodes: 22
+
+  drafts_dir: series/drafts
+  overview: series_overview.md   # always inject as global context
+  pov_files:
+    son: son_pov_stories.md
+    father: father_pov_stories.md
+    mother: mother_pov_stories.md
+  # 각 마크다운 파일은 "## 사건 N: <title>" 헤딩으로 섹션 분리.
+
+# ─────────────────────────────────────────────────
+# 22 episodes (시간 순 + 시점 순)
+# characters: 가족 멤버별 stage (character_templates.yaml의 stage 키와 매칭)
+# ─────────────────────────────────────────────────
+episodes:
+  # ── 사건 1 (1985 봄, 도시락) — 3 POV ──
+  - ep: 1
+    event_idx: 1
+    perspective: son
+    title: "어머니의 도시락엔 왜 고기가 없었을까"
+    year: 1985
+    season: spring
+    family_ages: { son: 10, father: 36, mother: 28 }
+    characters: { son: child, mother: young_20s, father: young_30s }
+
+  - ep: 2
+    event_idx: 1
+    perspective: father
+    title: "내 아들의 소풍, 그리고 노란 종이봉투"
+    year: 1985
+    season: spring
+    family_ages: { son: 10, father: 36, mother: 28 }
+    characters: { father: young_30s, son: child, mother: young_20s }
+
+  - ep: 3
+    event_idx: 1
+    perspective: mother
+    title: "통닭 한 점도 입에 못 댄 그 밤"
+    year: 1985
+    season: spring
+    family_ages: { son: 10, father: 36, mother: 28, younger_sister: 7 }
+    characters: { mother: young_20s, father: young_30s, son: child, younger_sister: child }
+
+  # ── 사건 2 (1988 여름, 88올림픽) — son only ──
+  - ep: 4
+    event_idx: 2
+    perspective: son
+    title: "아버지가 처음으로 약속을 어긴 날"
+    year: 1988
+    season: summer
+    family_ages: { son: 13, father: 39, mother: 31 }
+    characters: { son: teen, father: young_30s, mother: young_20s }
+
+  # ── 사건 3 (1991 가을, 누나 운동화) — son + mother ──
+  - ep: 5
+    event_idx: 3
+    perspective: son
+    title: "누나의 새 신발과 옷핀 꽂힌 가방"
+    year: 1991
+    season: fall
+    family_ages: { son: 16, older_sister: 19, mother: 34 }
+    characters: { son: teen, older_sister: young_adult, mother: middle_40s }
+
+  - ep: 6
+    event_idx: 3
+    perspective: mother
+    title: "옷핀과 신발 박스 사이에서"
+    year: 1991
+    season: fall
+    family_ages: { son: 16, older_sister: 19, mother: 34 }
+    characters: { mother: middle_40s, older_sister: young_adult, son: teen }
+
+  # ── 사건 4 (1994 여름, 비 오는 날) — son + father ──
+  - ep: 7
+    event_idx: 4
+    perspective: son
+    title: "장마철, 아버지의 젖은 오른쪽 어깨"
+    year: 1994
+    season: summer
+    family_ages: { son: 19, father: 45 }
+    characters: { son: teen, father: middle_40s }
+
+  - ep: 8
+    event_idx: 4
+    perspective: father
+    title: "비 오는 날, 양복 안주머니의 회색 봉투"
+    year: 1994
+    season: summer
+    family_ages: { son: 19, father: 45 }
+    characters: { father: middle_40s, son: teen }
+
+  # ── 사건 5 (1997 겨울, IMF 거실) — 3 POV ──
+  - ep: 9
+    event_idx: 5
+    perspective: son
+    title: "IMF, 우리 집 거실에서 전등이 꺼진 이유"
+    year: 1997
+    season: winter
+    family_ages: { son: 22, father: 48, mother: 40 }
+    characters: { son: teen, father: middle_40s, mother: middle_40s }
+
+  - ep: 10
+    event_idx: 5
+    perspective: father
+    title: "양복을 입고 공원 벤치로 출근하던 100일"
+    year: 1997
+    season: winter
+    family_ages: { son: 22, father: 48, mother: 40 }
+    characters: { father: middle_40s, mother: middle_40s, son: teen }
+
+  - ep: 11
+    event_idx: 5
+    perspective: mother
+    title: "거실 어둠 속, 사채업자의 목소리"
+    year: 1997
+    season: winter
+    family_ages: { son: 22, father: 48, mother: 40 }
+    characters: { mother: middle_40s, father: middle_40s, son: teen }
+
+  # ── 사건 6 (1999 가을, 택시) — son + father ──
+  - ep: 12
+    event_idx: 6
+    perspective: son
+    title: "취한 밤, 택시 운전석에서 만난 아버지"
+    year: 1999
+    season: fall
+    family_ages: { son: 24, father: 50 }
+    characters: { son: young_adult, father: middle_40s }
+
+  - ep: 13
+    event_idx: 6
+    perspective: father
+    title: "내 택시에 탄 취객이 내 아들이었을 때"
+    year: 1999
+    season: fall
+    family_ages: { son: 24, father: 50 }
+    characters: { father: middle_40s, son: young_adult }
+
+  # ── 사건 7 (2005 겨울, 첫 월급) — son + mother ──
+  - ep: 14
+    event_idx: 7
+    perspective: son
+    title: "어머니가 제 용돈 봉투를 그냥 가계부에 끼운 이유"
+    year: 2005
+    season: winter
+    family_ages: { son: 30, mother: 48 }
+    characters: { son: young_adult, mother: middle_40s }
+
+  - ep: 15
+    event_idx: 7
+    perspective: mother
+    title: "빨간 봉투의 무게로 책장이 휘던 날"
+    year: 2005
+    season: winter
+    family_ages: { son: 30, mother: 48 }
+    characters: { mother: middle_40s, son: young_adult }
+
+  # ── 사건 8 (2010 가을, 결혼식) — 3 POV ──
+  - ep: 16
+    event_idx: 8
+    perspective: son
+    title: "결혼식 날, 아버지의 손은 왜 그렇게 떨렸을까"
+    year: 2010
+    season: fall
+    family_ages: { son: 35, father: 61, mother: 53 }
+    characters: { son: young_adult, father: elder_60s, mother: middle_40s }
+
+  - ep: 17
+    event_idx: 8
+    perspective: father
+    title: "흰 장갑 안에 숨긴 떨림"
+    year: 2010
+    season: fall
+    family_ages: { son: 35, father: 61, mother: 53 }
+    characters: { father: elder_60s, son: young_adult, mother: middle_40s }
+
+  - ep: 18
+    event_idx: 8
+    perspective: mother
+    title: "흰 장갑 두 손이 만나는 그 순간"
+    year: 2010
+    season: fall
+    family_ages: { son: 35, father: 61, mother: 53 }
+    characters: { mother: middle_40s, father: elder_60s, son: young_adult }
+
+  # ── 사건 9 (2019 명절, 스마트폰) — son + father ──
+  - ep: 19
+    event_idx: 9
+    perspective: son
+    title: "스마트폰을 묻는 아버지께 제가 한 실수"
+    year: 2019
+    season: holiday
+    family_ages: { son: 44, father: 70 }
+    characters: { son: middle_40s, father: elder_70s }
+
+  - ep: 20
+    event_idx: 9
+    perspective: father
+    title: "메모지에 적어둔 카톡 사진 보내는 법"
+    year: 2019
+    season: holiday
+    family_ages: { son: 44, father: 70 }
+    characters: { father: elder_70s, son: middle_40s }
+
+  # ── 사건 10 (2025 봄, 택시 장부) — son + mother ──
+  - ep: 21
+    event_idx: 10
+    perspective: son
+    title: "아버지의 낡은 택시 장부 속 마지막 일기"
+    year: 2025
+    season: spring
+    family_ages: { son: 50, mother: 68 }
+    characters: { son: middle_40s, mother: elder_60s }
+
+  - ep: 22
+    event_idx: 10
+    perspective: mother
+    title: "30년 동안 알면서도 묻지 않은 책"
+    year: 2025
+    season: spring
+    family_ages: { son: 50, mother: 68 }
+    characters: { mother: elder_60s, son: middle_40s }

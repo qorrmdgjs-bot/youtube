@@ -47,6 +47,13 @@ class ScriptGenStage(BaseStage):
             target_duration_sec=brief.target_duration_sec,
             custom_keywords=brief.custom_keywords,
             arc_structure=arc_data["structure"],
+            # Series mode fields (None/empty unless built via build_episode_brief)
+            series_context_md=brief.series_context_md,
+            series_overview_md=brief.series_overview_md,
+            episode_number=brief.episode_number,
+            event_idx=brief.event_idx,
+            perspective=brief.perspective,
+            characters_in_episode=brief.characters_in_episode,
         )
 
         # Call LLM

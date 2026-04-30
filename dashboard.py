@@ -50,8 +50,8 @@ STAGE_LABELS = {
     "a_script_gen": "📝 스크립트 생성",
     "b_scene_segment": "🎬 장면 분할",
     "c_visual_prompt": "🖼️ 시각 프롬프트",
+    "c2_character_sheet": "🧑‍🎨 캐릭터 시트",
     "d_tts_gen": "🔊 음성 생성",
-    "e_bgm_select": "🎵 BGM 선택",
     "f_subtitle_split": "💬 자막 생성",
     "g_image_gen": "🎨 이미지 생성",
     "h_video_compose": "🎥 영상 합성",
@@ -83,8 +83,8 @@ def build_orchestrator() -> PipelineOrchestrator:
     from src.pipeline.a_script_gen import ScriptGenStage
     from src.pipeline.b_scene_segment import SceneSegmentStage
     from src.pipeline.c_visual_prompt import VisualPromptStage
+    from src.pipeline.c2_character_sheet import CharacterSheetStage
     from src.pipeline.d_tts_gen import TTSGenStage
-    from src.pipeline.e_bgm_select import BGMSelectStage
     from src.pipeline.f_subtitle_split import SubtitleSplitStage
     from src.pipeline.g_image_gen import ImageGenStage
     from src.pipeline.h_video_compose import VideoComposeStage
@@ -96,8 +96,8 @@ def build_orchestrator() -> PipelineOrchestrator:
 
     orch = PipelineOrchestrator()
     for cls in [
-        ScriptGenStage, SceneSegmentStage, VisualPromptStage,
-        TTSGenStage, BGMSelectStage, SubtitleSplitStage,
+        ScriptGenStage, SceneSegmentStage, VisualPromptStage, CharacterSheetStage,
+        TTSGenStage, SubtitleSplitStage,
         ImageGenStage, VideoComposeStage,
         ThumbnailGenStage, MetadataGenStage, MonetizationDescStage,
         ShortsTeaserStage, ExportPackageStage,

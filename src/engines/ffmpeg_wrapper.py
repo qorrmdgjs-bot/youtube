@@ -250,53 +250,6 @@ def _fade_concat(
             f.unlink(missing_ok=True)
 
 
-def mix_audio(
-    narration_path: Path,
-    bgm_path: Path,
-    output_path: Path,
-    narration_db: float = -3,
-    bgm_db: float = -15,
-    fade_out_sec: float = 3.0,
-) -> None:
-    """Mix narration and BGM with ducking and fade.
-
-    Falls back to narration-only if mixing fails.
-    """
-    narr_duration = _get_duration(narration_path) or 300.0
-    # BGM runs for the full duration + extra 5 seconds for fade out after narration ends
-    total_duration = narr_duration + 5.0
-    fade_start = max(0, total_duration - fade_out_sec)
-
-    mix_result = subprocess.run(
-        [
-            "ffmpeg", "-y",
-            "-i", str(narration_path),
-            "-stream_loop", "-1",
-            "-i", str(bgm_path),
-            "-filter_complex", (
-                f"[0:a]aresample=44100,volume={narration_db}dB[narr];"
-                f"[1:a]aresample=44100,volume={bgm_db}dB,"
-                f"afade=t=in:st=0:d=2,"
-                f"afade=t=out:st={fade_start}:d={fade_out_sec}[bgm];"
-                f"[narr][bgm]amix=inputs=2:duration=longest:dropout_transition=3[out]"
-            ),
-            "-map", "[out]",
-            "-t", str(total_duration),
-            "-c:a", "libmp3lame",
-            "-q:a", "2",
-            "-ar", "44100",
-            "-ac", "2",
-            str(output_path),
-        ],
-        capture_output=True,
-    )
-
-    if mix_result.returncode != 0:
-        log.warning("audio_mix_failed, using narration only")
-        import shutil
-        shutil.copy2(str(narration_path), str(output_path))
-
-
 def burn_subtitles(
     video_path: Path,
     subtitle_path: Path,

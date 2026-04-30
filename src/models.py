@@ -63,6 +63,24 @@ class ProjectBrief(BaseModel):
     voice_gender: Literal["female", "male"] = "female"
     custom_keywords: list[str] = Field(default_factory=list)
 
+    # Series mode (optional — populated when episode is generated from series bible)
+    series_id: str | None = None
+    episode_number: int | None = None
+    event_idx: int | None = None
+    perspective: Literal["son", "father", "mother"] | None = None
+    series_context_md: str | None = Field(
+        default=None,
+        description="Source-of-truth markdown section for this episode (from drafts/{pov}_pov_stories.md)",
+    )
+    series_overview_md: str | None = Field(
+        default=None,
+        description="Series-wide overview markdown (drafts/series_overview.md)",
+    )
+    characters_in_episode: dict[str, str] = Field(
+        default_factory=dict,
+        description="role_id -> stage_id mapping for the time of this episode (e.g., {'son': 'teen', 'father': 'middle_40s'})",
+    )
+
 
 # --- Script Models ---
 
@@ -80,8 +98,25 @@ class Scene(BaseModel):
     transition: TransitionType = TransitionType.CROSSFADE
     has_silence_before: bool = False
     silence_duration_sec: float = 0.0
-    use_ai_video: bool = False  # If True, G2 stage generates AI video clip (Veo)
-    motion_prompt: str | None = None  # Optional explicit motion hint for image-to-video
+
+    # Phase 3+ fields for series mode + selective Veo
+    is_key_scene: bool = Field(
+        default=False,
+        description="True for climax-phase scenes; gates Veo 3.1 generation in stage G2",
+    )
+    characters_in_scene: list[str] = Field(
+        default_factory=list,
+        description="Subset of episode characters appearing in this scene (role_id list, e.g., ['father', 'son'])",
+    )
+    image_key: int | None = Field(
+        default=None,
+        description=(
+            "Group key for image sharing. Sub-scenes split from the same original LLM scene "
+            "share an image_key, so stage G generates ONE image for the group and stage H "
+            "applies different Ken Burns directions per sub-scene to create movement instead "
+            "of cutting between visually similar shots."
+        ),
+    )
 
 
 class Script(BaseModel):

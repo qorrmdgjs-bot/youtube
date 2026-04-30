@@ -14,19 +14,7 @@ video:
   audio_bitrate: "192k"
   default_duration_sec: 480    # 8 minutes (seniors prefer 8-12min)
 
-# Audio mixing
-audio:
-  narration_db: -3
-  bgm_db: -3               # louder for senior hearing
-  fade_in_sec: 1.5
-  fade_out_sec: 3.0
-
-# BGM 사용 여부. 유튜브 업로드 시 유튜브 오디오 라이브러리를 쓸 거면 false.
-# true로 바꾸면 e_bgm_select가 assets/bgm/의 파일로 BGM 트랙을 합성함.
-bgm:
-  enabled: false
-
-# Subtitle (main video 1920x1080)
+# Subtitle (landscape main video 1920x1080)
 subtitle:
   font: "NanumSquareRoundEB"
   font_size: 22
@@ -38,15 +26,17 @@ subtitle:
   max_chars_per_line: 18
   max_syllables_per_sec: 3.5
 
-# Subtitle for Shorts (9:16, 1080x1920 — narrower frame)
-subtitle_shorts:
-  font: "NanumSquareRoundEB"
-  font_size: 11                 # 본편 22px의 절반 (쇼츠 크롭 후 과대 확대 방지)
-  font_color: "white"
-  outline_color: "black"
-  outline_width: 2
-  shadow_offset: 1
-  max_chars_per_line: 14
+# Shorts (1080x1920 portrait, 60s clips)
+shorts:
+  target_duration_sec: 60      # ~1 minute per short
+  min_duration_sec: 45
+  max_duration_sec: 70
+  # libass interprets these in 384x288 PlayRes coords for SRT-converted subs;
+  # values × ~6.67 = effective px on the 1080x1920 frame.
+  # Fontsize=18 ≈ 120px tall text; MarginV=25 ≈ 167px from bottom.
+  subtitle_font_size: 18
+  subtitle_margin_v: 25
+  source_video: "composed.mp4" # use pre-subtitle composed video so we can re-burn larger subs
 
 # Scene
 scene:
@@ -92,19 +82,6 @@ image:
   width: 1920
   height: 1080
   num_images_per_scene: 1
-
-# Video generation (image-to-video)
-video_engine:
-  engine: "veo_selective"       # "veo_selective" (핵심 장면만) | "veo_all" | "ken_burns"
-  veo_model: "veo-3.1-fast-generate-preview"
-  veo_duration_sec: 6
-  veo_generate_audio: false
-  # 감정/페이즈 태그가 이 목록에 포함된 장면만 AI 영상화 (veo_selective 모드)
-  # 2026-04-24 축소: climax 한 포인트만 Veo 적용 (비용 절감)
-  ai_video_emotions:
-    - "climax"
-  ai_video_phases:
-    - "climax"
 
 # Character sheet
 character_sheet:
