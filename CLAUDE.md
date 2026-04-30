@@ -10,27 +10,39 @@
 - 카테고리: 인물 및 블로그 (category_id: 22)
 - 브랜딩: `assets/branding/`
 
-## 오늘까지 (2026-04-25)
+## 오늘까지 (2026-04-30)
 
 ### 완료된 작업
 
 1. **시리즈 비전 확정** — 한 가족 일대기 × 10개 핵심 사건 × 시점별 deep-dive = **22화** (당초 30화에서 조정. 시점은 dramatic peak에만 추가)
 2. **Phase 1 캐릭터 anchor 13장 생성** — Nano Banana 2로 4종 가족 유형 ([assets/characters/](assets/characters/), $0.51)
-3. **스토리 초안 3 POV 확정** — 사용자가 직접 작성. 이 시리즈의 north star
+3. **스토리 초안 3 POV 확정** — 사용자가 직접 작성. 시리즈의 1차 north star
 4. **계획서·메모리·CLAUDE.md 정합성 정리**
 5. **GitHub 동기화** — `qorrmdgjs-bot/youtube` main 브랜치
+6. **22화 통합 디테일 시나리오 v4 확정** (2026-04-30) — 아래 ⭐ 항목 참조
 
-### 스토리 자산 (영상 제작의 기준)
+### ⭐ 영상 제작의 단일 source-of-truth (2026-04-30 확정)
 
-| 파일 | 내용 |
+| 파일 | 역할 |
 |------|------|
-| [series/drafts/son_pov_stories.md](series/drafts/son_pov_stories.md) | 아들 시점 10편 (시리즈의 척추) |
-| [series/drafts/father_pov_stories.md](series/drafts/father_pov_stories.md) | 아버지 시점 4편 (사건 1·4·6·8) |
-| [series/drafts/mother_pov_stories.md](series/drafts/mother_pov_stories.md) | 어머니 시점 4편 (사건 1·3·5·7) |
-| [series/drafts/series_overview.md](series/drafts/series_overview.md) | 시리즈 메시지·톤·POV 매트릭스 |
-| [series/prompts/son_pov_story_drafts.md](series/prompts/son_pov_story_drafts.md) | 외부 AI용 프롬프트 (아카이브) |
+| **[series/drafts/full_scenario_v4.md](series/drafts/full_scenario_v4.md)** | **22화 통합 디테일 시나리오 (확정본)** — 모든 영상 제작은 이 파일을 단일 source로 사용 |
+| [series/drafts/series_overview.md](series/drafts/series_overview.md) | 시리즈 메시지·톤·POV 매트릭스·소품 callback |
+| [series/our_family.yaml](series/our_family.yaml) | 22 에피소드 매핑 (episode N → event/POV/characters/age) |
 
-**모든 스크립트(LLM 생성) 작업은 위 4개 마크다운 파일을 source-of-truth로 참조해야 함.**
+**v4 시나리오의 단일 화자 원칙 (영상 제작 시 반드시 반영)**:
+- 22화 전체의 나레이터 = **50세 아들 한 사람**
+- 부모 시점 화(ep2·3·6·8·10·11·13·15·17·18·20·22)도 아들이 30년 후 부모의 그날을 회상하며 전하는 형태
+- 부모의 직접 대사·속마음은 *기울임체*로 처리
+- 후킹은 "그날의 풍경" 회상 묘사로 시작 (청자 호명 X)
+- 결말은 22화 모두 다른 호흡으로 닫음 (이미지 / 호명 / 인사 / 한 줄 결정타)
+
+**아카이브 (1차 정본, 참고용)**:
+- [series/drafts/son_pov_stories.md](series/drafts/son_pov_stories.md) — 아들 시점 10편 1차 초안
+- [series/drafts/father_pov_stories.md](series/drafts/father_pov_stories.md) — 아버지 시점 6편 1차 초안
+- [series/drafts/mother_pov_stories.md](series/drafts/mother_pov_stories.md) — 어머니 시점 6편 1차 초안
+- [series/drafts/full_scenario_v1.md](series/drafts/full_scenario_v1.md) ~ v3 — v4 도달 과정의 이전 버전
+
+**모든 LLM 스크립트 생성 시 v4를 단일 source로 주입할 것.** 1차 정본 3 POV 파일은 v4와 충돌 시 v4가 우선.
 
 ### 사건별 POV 커버리지 (확정 22화)
 
