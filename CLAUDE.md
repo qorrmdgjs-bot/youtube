@@ -63,6 +63,75 @@
 
 **소품 callback 원칙** (영상 제작 핵심): 각 사건마다 시그니처 소품이 시점 사이를 연결. 시청자가 "아! 저 장면이 이런 뜻이었구나" 무릎 치는 효과. 매트릭스 전문은 [series/drafts/series_overview.md](series/drafts/series_overview.md) 참조.
 
+## 🎬 영상 제작 현황 (2026-04-30 기준)
+
+### 화별 production 상태
+
+| 화 | 사건 | 시점 | 상태 | 프로젝트 ID | 비고 |
+|---|---|---|---|---|---|
+| ep1 | 1 | son | ❓ 다른 PC에 보관 | — | 사용자가 다른 PC에서 작업. 통합 필요 |
+| ep2 | 1 | father | ⚠️ 1차 정본 기반 | `20260430_100800_b0662e` | v4 이전 버전. 단일 화자 fix 적용 X. **v4로 재생성 권장** |
+| ep3 | 1 | mother | ✅ **v4 + 단일 화자** | **`20260430_164319_da3e73`** | v4 검증 완료. $0.86 |
+| ep4~ep22 | 2~10 | 각각 | ⏳ 미작성 | — | 모두 v4 + 단일 화자 적용으로 진행 |
+
+**EP3 v4 최종본 위치**: [projects/20260430_164319_da3e73/video/ep3/final.mp4](projects/20260430_164319_da3e73/video/ep3/final.mp4)
+- 자동 생성 제목: "새벽 4시 도시락 싸던 엄마의 숨겨진 눈물 😭 통닭 한 점도 못 드신 그 봄날의 진실"
+- 쇼츠 3개 (opening / reveal / ending) + 통합 teaser 포함
+
+### 다음 화 진행 명령 (한 줄)
+
+```bash
+cd "C:/Users/백승헌_i5b45pl/OneDrive - DPLANEX/백승헌/procjet/youtube"
+PYTHONIOENCODING=utf-8 python -X utf8 -m src.cli series episode --episode <N>
+```
+
+- `<N>`은 1~22 정수
+- 자동으로 `our_family.yaml` → `full_scenario_v4.md`의 `### EP{N}.` 섹션을 source로 사용
+- Windows 콘솔 cp949 인코딩 이슈 회피를 위해 `PYTHONIOENCODING=utf-8 python -X utf8` 필수
+- 비용: 화당 ~$0.85, 소요: ~12-22분 (Gemini 3.1 Flash + ElevenLabs)
+- 결과: `projects/<timestamp_id>/video/ep<N>/final.mp4` + 쇼츠 3개 + 썸네일
+
+### 추천 다음 화
+
+1. **ep4 (88올림픽 컬러 TV, 아들 13세, 1988 여름)** — 미작성 화, son POV로 단일 화자 검증 추가
+2. **ep2 v4 재생성** — 옛 버전을 v4·단일 화자 톤으로 갱신 (선택)
+
+### 화별 production 검증 체크리스트 (생성 직후 반드시 확인)
+
+1. **narration 화자** — `script.json`의 `dialogue` 필드에서:
+   - ✅ 부모 시점 화: "어머니/아버지" (3인칭) + "제/저는" (아들의 1인칭)
+   - ❌ "제 손이 시렸습니다" 같이 부모를 1인칭 화자로 쓰면 잘못. 프롬프트 재점검 필요
+2. **이미지 prop callback** — `scenes/scene_*.json`에서 v4 시그니처 모티프 (행주, 빈 도시락통, 노란 봉투, 옷핀, 회색 봉투, 흰 장갑, 메모지, 택시 로그북) 반영 확인
+3. **자동 생성 제목** — v4 후킹의 핵심 키워드(빈 도시락통, 새벽 4시 등)가 제목에 반영됐는지
+4. **2초 침묵** — 클라이맥스 직전 `has_silence_before: true` + `silence_duration_sec: 2.0` 확인
+5. **sign-off** — 마지막 afterglow 장면이 아들 화법으로 채널 sign-off (실화·영상으로 남기기·감사) 포함
+
+### 파이프라인 핵심 코드 (이미 구현됨)
+
+| 파일 | 역할 |
+|------|------|
+| [series/our_family.yaml](series/our_family.yaml) | `scenario: full_scenario_v4.md` 필드로 v4 우선 사용 |
+| [src/series_loader.py](src/series_loader.py) | `extract_episode_section_v4()` — `### EP{n}.` 헤딩 기준 섹션 추출 |
+| [templates/prompts/script_gen_user.txt](templates/prompts/script_gen_user.txt) | ⭐ 단일 화자(아들) 절대 규칙 + ✅/❌ 예시 + sign-off 가이드 |
+| [src/pipeline/a_script_gen.py](src/pipeline/a_script_gen.py) | series_context_md + series_overview_md를 LLM에 주입 |
+
+### 알려진 이슈 / 주의사항
+
+- **Windows cp949 인코딩**: 모든 CLI 호출 시 `PYTHONIOENCODING=utf-8 python -X utf8` 필수. 이게 없으면 emoji 출력에서 `UnicodeEncodeError` 발생
+- **ep2(`20260430_100800_b0662e`)·ep3 옛버전(`20260430_111807_734e86`)**: v4 적용 전 산출물. 톤이 v4와 다름. 정합성 위해 ep2도 재생성 권장
+- **다른 PC의 ep1**: 사용자가 별도 PC에서 작업한 ep1 산출물이 있음 (다른 PC에 저장). 본 PC에는 없음. 통합 시 위치 확인 필요
+- **신규 untracked 파일**: `.claude/`, `assets/character_sheets/parent_sacrifice/mother/`, `null`, `youtube-ai-dashboard/`, `youtube-ai-dashboard-prompt.md`, `youtube/` 폴더는 의도적으로 git에 안 올림 (용량/실험 목적). git status 시 무시 가능.
+
+### 최근 commit 이력 (확정본 기준)
+
+```
+c212543 fix(prompt): enforce single narrator (son) for series mode regardless of perspective
+2a6c5f6 feat(series_loader): support v4 unified scenario as primary source
+16bba95 docs(scenario): finalize 22-episode unified scenario v4 as single source-of-truth
+cc1d322 feat(pipeline): write video files to <project>/video/ep<N>/ for series episodes
+d7e0739 fix(l): use cwd + basenames to bypass ffmpeg subtitles filter path issues
+```
+
 ## 시리즈 비전 (변경 불가)
 
 - 한 가족(parent_sacrifice 5인) 30년 일대기를 22화 시리즈로
