@@ -17,11 +17,12 @@ ALL_STAGES = [
     "a_script_gen",
     "b_scene_segment",
     "c_visual_prompt",
+    "c2_character_sheet",
     "d_tts_gen",
     "e_bgm_select",
     "f_subtitle_split",
     "g_image_gen",
-    # g2_image_to_video 제거 — Ken Burns 효과로 대체
+    "g2_image_to_video",  # Veo 3.1 핵심 장면만 (2026-04-24)
     "h_video_compose",
     "i_thumbnail_gen",
     "j_metadata_gen",

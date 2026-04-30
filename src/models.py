@@ -23,6 +23,7 @@ class FamilyType(str, Enum):
     CAREER_PARENT = "career_sacrifice_parent"
     IMMIGRANT = "immigrant_parent"
     COUPLE = "couple_growing_old"
+    MODERN_THREE_GEN = "modern_three_gen"  # 현대 3세대 가족 (조부모+부모+자녀)
 
 
 class EndingType(str, Enum):
@@ -58,7 +59,7 @@ class ProjectBrief(BaseModel):
     family_type: FamilyType
     emotional_arc: str = Field(description="Key from emotional_arcs.yaml")
     ending_type: EndingType = EndingType.HEALING
-    target_duration_sec: int = Field(default=480, ge=240, le=720)
+    target_duration_sec: int = Field(default=480, ge=60, le=720)
     voice_gender: Literal["female", "male"] = "female"
     custom_keywords: list[str] = Field(default_factory=list)
 
@@ -79,6 +80,8 @@ class Scene(BaseModel):
     transition: TransitionType = TransitionType.CROSSFADE
     has_silence_before: bool = False
     silence_duration_sec: float = 0.0
+    use_ai_video: bool = False  # If True, G2 stage generates AI video clip (Veo)
+    motion_prompt: str | None = None  # Optional explicit motion hint for image-to-video
 
 
 class Script(BaseModel):
@@ -117,6 +120,8 @@ class ProjectManifest(BaseModel):
     brief: ProjectBrief
     stages: dict[str, StageInfo] = Field(default_factory=dict)
     total_cost_usd: float = 0.0
+    # role → ordered list of character sheet image paths (front/profile/fullbody)
+    character_refs: dict[str, list[str]] = Field(default_factory=dict)
 
     def get_stage(self, name: str) -> StageInfo:
         if name not in self.stages:

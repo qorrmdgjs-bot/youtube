@@ -3,12 +3,12 @@
 
 tracks:
   lullaby_for_the_lost:
-    file: "lullaby_for_the_lost.mp3"
-    name: "Lullaby for the Lost"
+    file: "BGM.m4a"
+    name: "Main BGM (사용자 제공)"
     mood: ["warm", "nostalgia", "gentle_sadness", "hopeful", "healing", "contemplation", "catharsis"]
     bpm: 70
     duration_sec: 192
-    license: "Royalty Free"
+    license: "User provided"
     intensity: "medium"
 
 # All emotions map to the single track

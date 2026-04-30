@@ -21,6 +21,14 @@ class BGMSelectStage(BaseStage):
     dependencies = ["b_scene_segment"]
 
     def execute(self, project_dir: Path, manifest: ProjectManifest) -> float:
+        # 전역 BGM 토글 체크 — 비활성화면 아무것도 하지 않음.
+        # H 스테이지는 bgm.mp3 부재 시 자동으로 내레이션만 사용.
+        with open(PROJECT_ROOT / "config" / "settings.yaml", encoding="utf-8") as f:
+            app_settings = yaml.safe_load(f)
+        if not app_settings.get("bgm", {}).get("enabled", True):
+            self.log.info("bgm_disabled_skipping_stage")
+            return 0.0
+
         script = Script.model_validate_json(
             (project_dir / "script.json").read_text(encoding="utf-8")
         )
@@ -126,11 +134,16 @@ class BGMSelectStage(BaseStage):
         return best_track
 
     def _build_phased_bgm(self, tracks: dict, phase_bgms: list[dict], output_path: Path) -> None:
-        """Build BGM by stitching phase-specific tracks with crossfade."""
-        import tempfile
+        """Build BGM by stitching phase-specific tracks with crossfade.
 
+        Windows 한글 경로 이슈 대응: tempfile 대신 프로젝트 audio 디렉토리에
+        concat 리스트를 만들고, 경로는 relative + forward-slash로 기술해
+        ffmpeg이 안정적으로 읽도록 한다.
+        """
         phase_clips: list[Path] = []
         crossfade_sec = 2.0
+
+        audio_dir = output_path.parent
 
         for i, phase in enumerate(phase_bgms):
             track_id = phase["track_id"]
@@ -143,10 +156,9 @@ class BGMSelectStage(BaseStage):
             if not source_path.exists():
                 continue
 
-            clip_path = output_path.parent / f"_bgm_phase_{i}.mp3"
+            clip_path = audio_dir / f"_bgm_phase_{i}.mp3"
             duration = phase["duration"]
 
-            # Trim/loop track to phase duration with fade
             fade_in = 1.5 if i == 0 else crossfade_sec
             fade_out = 3.0 if i == len(phase_bgms) - 1 else crossfade_sec
 
@@ -154,12 +166,12 @@ class BGMSelectStage(BaseStage):
                 [
                     "ffmpeg", "-y",
                     "-stream_loop", "-1",
-                    "-i", str(source_path),
-                    "-t", str(duration + crossfade_sec),  # Extra for crossfade overlap
+                    "-i", source_path.as_posix(),
+                    "-t", str(duration + crossfade_sec),
                     "-af", f"afade=t=in:st=0:d={fade_in},afade=t=out:st={duration - fade_out + crossfade_sec}:d={fade_out}",
                     "-c:a", "libmp3lame",
                     "-q:a", "2",
-                    str(clip_path),
+                    clip_path.as_posix(),
                 ],
                 capture_output=True,
             )
@@ -174,11 +186,13 @@ class BGMSelectStage(BaseStage):
             shutil.move(str(phase_clips[0]), str(output_path))
             return
 
-        # Concatenate phase clips
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
-            for p in phase_clips:
-                f.write(f"file '{p.resolve()}'\n")
-            list_file = f.name
+        # concat 리스트 파일은 audio 디렉토리에 생성 (한글 temp 경로 회피)
+        # 파일명 참조는 같은 폴더에 있으므로 basename만 기술
+        list_file = audio_dir / "_bgm_concat.txt"
+        list_file.write_text(
+            "\n".join(f"file '{p.name}'" for p in phase_clips) + "\n",
+            encoding="utf-8",
+        )
 
         try:
             subprocess.run(
@@ -186,16 +200,16 @@ class BGMSelectStage(BaseStage):
                     "ffmpeg", "-y",
                     "-f", "concat",
                     "-safe", "0",
-                    "-i", list_file,
+                    "-i", list_file.as_posix(),
                     "-c:a", "libmp3lame",
                     "-q:a", "2",
-                    str(output_path),
+                    output_path.as_posix(),
                 ],
                 capture_output=True,
                 check=True,
             )
         finally:
-            Path(list_file).unlink(missing_ok=True)
+            list_file.unlink(missing_ok=True)
             for p in phase_clips:
                 p.unlink(missing_ok=True)
 

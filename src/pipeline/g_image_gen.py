@@ -2,30 +2,38 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
+import yaml
+
+from src.engines.engine_factory import get_image_client
+from src.engines.llm_client import PROJECT_ROOT
 from src.models import ProjectManifest, Script
 from src.pipeline.base_stage import BaseStage
 
 
 class ImageGenStage(BaseStage):
     name = "g_image_gen"
-    dependencies = ["c_visual_prompt"]
+    dependencies = ["c_visual_prompt", "c2_character_sheet"]
 
     def execute(self, project_dir: Path, manifest: ProjectManifest) -> float:
         script = Script.model_validate_json(
             (project_dir / "script.json").read_text(encoding="utf-8")
         )
 
-        # Choose client based on API availability
-        client = self._get_client()
+        with open(PROJECT_ROOT / "config" / "settings.yaml", encoding="utf-8") as f:
+            settings = yaml.safe_load(f)
+
+        client = get_image_client(settings)
         total_cost = 0.0
+
+        ref_image_paths: list[Path] = []
+        for paths in manifest.character_refs.values():
+            ref_image_paths.extend(Path(p) for p in paths)
 
         for scene in script.scenes:
             output_path = project_dir / "scenes" / f"scene_{scene.index:03d}.png"
 
-            # Skip if image already exists
             if output_path.exists():
                 self.log.info("image_exists_skip", scene=scene.index)
                 continue
@@ -34,25 +42,12 @@ class ImageGenStage(BaseStage):
             cost = client.generate(
                 prompt=prompt,
                 output_path=output_path,
-                seed=scene.index * 1000,  # Deterministic seed per scene
+                ref_images=ref_image_paths or None,
+                seed=scene.index * 1000,
             )
             total_cost += cost
 
-            self.log.info(
-                "image_generated",
-                scene=scene.index,
-                cost=cost,
-            )
+            self.log.info("image_generated", scene=scene.index, cost=cost)
 
         self.log.info("image_gen_complete", scenes=len(script.scenes), cost=total_cost)
         return total_cost
-
-    def _get_client(self):
-        """Get image client - real API or placeholder fallback."""
-        if os.environ.get("REPLICATE_API_TOKEN"):
-            from src.engines.image_client import ImageClient
-            return ImageClient()
-
-        self.log.warning("replicate_token_missing, using placeholder images")
-        from src.engines.image_client import PlaceholderImageClient
-        return PlaceholderImageClient()

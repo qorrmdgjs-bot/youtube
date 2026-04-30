@@ -38,7 +38,8 @@ source .venv/bin/activate
 ### 환경변수 (.env)
 ```
 ANTHROPIC_API_KEY=sk-ant-xxxxx          # 필수 - Claude API
-REPLICATE_API_TOKEN=r8_xxxxx            # 필수 - FLUX.1 이미지
+GOOGLE_GENAI_API_KEY=xxxxx              # 필수 - Nano Banana 2 이미지 + Veo 3.1 영상
+REPLICATE_API_TOKEN=r8_xxxxx            # 선택 - FLUX.1 폴백 (없어도 작동)
 ELEVENLABS_API_KEY=sk_xxxxx             # 필수 - 고품질 한국어 TTS (유료 Starter 플랜)
 GOOGLE_APPLICATION_CREDENTIALS=credentials/tts-service-account.json  # 선택 - Google Cloud TTS (폴백, 없어도 됨)
 ```
@@ -136,16 +137,17 @@ youtube/
 │   ├── orchestrator.py       # 파이프라인 DAG 컨트롤러
 │   ├── project_manager.py    # 프로젝트 디렉토리 CRUD
 │   │
-│   ├── pipeline/             # 13개 파이프라인 스테이지 (A~M, G2 제거)
+│   ├── pipeline/             # 15개 파이프라인 스테이지 (A~M + C2, G2 재활성)
 │   │   ├── a_script_gen.py     # LLM 스크립트 생성
 │   │   ├── b_scene_segment.py  # 장면 분할 + 서브씬 자동 분할 (15초 초과 시)
-│   │   ├── c_visual_prompt.py  # 이미지 프롬프트 추출 (시니어 친화 웹툰 스타일 + 캐릭터 일관성)
+│   │   ├── c_visual_prompt.py  # 이미지 프롬프트 추출 + 핵심 장면 use_ai_video 플래그
+│   │   ├── c2_character_sheet.py # 캐릭터 시트 생성/로드 (Nano Banana 2, 참조 이미지 기반 정면/측면/전신)
 │   │   ├── d_tts_gen.py        # TTS (ElevenLabs > Google > gTTS) + 오디오 후처리
 │   │   ├── e_bgm_select.py     # 감정 구간별 BGM 매칭 (단일곡 루프)
 │   │   ├── f_subtitle_split.py # SRT 자막 생성 (실제 TTS 오디오 길이 기반 동기화)
-│   │   ├── g_image_gen.py      # 이미지 생성 (FLUX.1 Pro, 1440x810)
-│   │   ├── g2_image_to_video.py # [비활성] 이미지→영상 변환 (비용 절감으로 제거, Ken Burns 대체)
-│   │   ├── h_video_compose.py  # FFmpeg 합성 (Ken Burns 6방향 효과)
+│   │   ├── g_image_gen.py      # 이미지 생성 (Gemini Nano Banana 2 + 캐릭터 시트 참조, FLUX 폴백)
+│   │   ├── g2_image_to_video.py # 핵심 장면 Veo 3.1 Fast image-to-video (감정 피크만)
+│   │   ├── h_video_compose.py  # FFmpeg 혼합 합성 (AI 클립 존재 시 사용, 없으면 Ken Burns)
 │   │   ├── i_thumbnail_gen.py  # 썸네일 (96px, 따뜻한 색보정, 이모지)
 │   │   ├── j_metadata_gen.py   # YouTube 메타데이터 (60-90자 이모지 제목)
 │   │   ├── k_monetization_desc.py  # 수익화 설명문 (가족유형별 CTA)
@@ -156,9 +158,12 @@ youtube/
 │   │   ├── llm_client.py       # Claude API (프롬프트 캐싱, API 에러만 재시도)
 │   │   ├── elevenlabs_client.py # ElevenLabs TTS (한국어 네이티브 음성)
 │   │   ├── tts_client.py       # Google Cloud TTS (SSML, Neural2 폴백)
-│   │   ├── image_client.py     # Replicate FLUX.1 (1440x810) + Placeholder 폴백
-│   │   ├── video_gen_client.py  # Replicate Wan 2.1 Image-to-Video
-│   │   └── ffmpeg_wrapper.py   # FFmpeg (AI클립/Ken Burns, xfade, 자막 번인, 44.1kHz)
+│   │   ├── image_client.py     # Replicate FLUX.1 (1440x810) — 폴백용, Placeholder 포함
+│   │   ├── gemini_image_client.py # Nano Banana 2 (gemini-3.1-flash-image-preview) + multi-image 입력
+│   │   ├── veo_video_client.py   # Veo 3.1 Fast image-to-video ($0.10/s, 오디오 off)
+│   │   ├── video_gen_client.py  # Replicate Wan 2.1 — 폴백용
+│   │   ├── engine_factory.py   # settings.yaml에 따라 이미지/영상 클라이언트 선택 + 자동 폴백
+│   │   └── ffmpeg_wrapper.py   # FFmpeg (Ken Burns, xfade, 자막 번인, 44.1kHz)
 │   │
 │   └── utils/                # 로깅, 재시도, 캐시, 한글 유틸리티
 │
@@ -196,19 +201,25 @@ streamlit run dashboard.py --server.headless true   # → http://localhost:8501
 | 프로젝트 현황 | 전체 목록, 진행률, 영상/썸네일 미리보기, 다운로드, 실패 재시도 |
 | 비용 리포트 | 총 비용, 월 예산, 프로젝트별 비용 분석 |
 
-## 파이프라인 DAG (A~M, 13단계)
+## 파이프라인 DAG (A~M + C2, 15단계)
 
 ```
 A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
-  → C) 시각 프롬프트 (시니어 친화 웹툰 스타일 + 캐릭터 일관성) → G) 이미지 (FLUX.1) ─┐
-  → D) TTS (ElevenLabs Haechan 남성) → F) 자막 (TTS 오디오 동기화)                    ┤
-  → E) BGM (Lullaby for the Lost, 구간별 루프)                                         ┘
-    → H) 영상 합성 (Ken Burns 효과 + BGM 처음~끝 재생 + 페이드아웃)
+  → C) 시각 프롬프트 + use_ai_video 플래그 (감정 피크 선별) ┐
+  → C2) 캐릭터 시트 (Nano Banana 2, 참조 이미지→정면/측면/전신 1회 생성·재사용) ┤
+                                                            ↓
+  → G) 이미지 (Gemini Nano Banana 2 + 캐릭터 시트 ref_images로 얼굴 일관성 유지)
+       ↓
+       G2) 핵심 장면 Veo 3.1 Fast image-to-video (감정 피크 장면만, 6초/클립)
+       ↓
+  → D) TTS (ElevenLabs Haechan 남성) → F) 자막 (TTS 오디오 동기화)
+  → E) BGM (Lullaby for the Lost, 구간별 루프)
+    → H) 혼합 합성 (AI 클립 존재하는 장면은 Veo, 나머지는 Ken Burns + BGM + 자막 번인)
       → I) 썸네일 / J) 메타 / K) 수익화 / L) 쇼츠 멀티클립
         → M) 최종 패키징
 ```
 
-> **참고**: G2(이미지→영상, Wan 2.1) 제거 — Ken Burns 효과로 대체하여 영상당 ~$2.20 절감
+> **참고**: 2026-04-24 엔진 전환 — 이미지는 Gemini 3 Flash Image(Nano Banana 2)로, 핵심 장면만 Veo 3.1 Fast 적용. FLUX.1/Ken Burns는 영구 폴백으로 유지. 캐릭터 시트는 가족유형당 1회 생성 후 `assets/character_sheets/`에서 재사용.
 
 ## 기본 스토리 배경
 
@@ -298,8 +309,8 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 | FPS | 24 (시네마틱) |
 | 기본 길이 | 5분 |
 | 이미지 스타일 | 한국 웹툰(만화) 스타일, 깔끔한 라인아트, 어스톤 색감 |
-| 이미지 생성 | FLUX.1 Pro, 1440x810 (API 제한) |
-| 영상 변환 | 제거됨 — Ken Burns 6방향 효과로 대체 (비용 절감) |
+| 이미지 생성 | Nano Banana 2 (`gemini-3.1-flash-image-preview`) + 캐릭터 시트 참조 — FLUX.1 Pro 폴백 |
+| 영상 변환 | Veo 3.1 Fast 핵심 장면(감정 피크)만 적용, 6초/클립 — 그 외 Ken Burns 6방향 |
 | 장면 분할 | 15초 초과 시 서브씬 자동 분할 (장면당 1이미지) |
 | 오디오 | 44.1kHz 스테레오, EQ (250Hz 웜 부스트 + 4kHz 컷), -16 LUFS |
 | BGM | -3dB, 처음~끝 재생 + 페이드 아웃 |
@@ -330,24 +341,28 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 
 ## 비용 관리
 
-### 영상당 비용 (풀 API 기준)
+### 영상당 비용 (2026-04-24 이후, Gemini + Veo climax-only 기준)
 | 항목 | 비용 |
 |------|------|
 | Claude API (스크립트+메타) | ~$0.15 |
 | ElevenLabs TTS | ~$0.23 |
-| FLUX.1 이미지 (22장) | ~$1.21 |
-| Ken Burns 효과 (FFmpeg) | $0 |
-| **영상당 합계** | **~$1.60** |
+| Nano Banana 2 이미지 (26장) | ~$1.01 |
+| Veo 3.1 Fast (climax 1-2장 × 6초) | ~$0.60-1.20 |
+| Ken Burns (나머지 장면) | $0 |
+| **영상당 합계** | **~$2.00-2.60** |
 
-> **절감**: Wan 2.1 영상 변환 제거로 영상당 ~$2.20 절약
+> **Veo 범위 조정**: 현재는 `phase=climax` 또는 `emotion=climax` 장면만 AI 영상화 (보통 1-2장). 범위를 넓히려면 `config/settings.yaml`의 `video_engine.ai_video_emotions` / `ai_video_phases`에 항목 추가.
+> **FLUX/Ken Burns-only 복귀**: `image.engine=flux`, `video_engine.engine=ken_burns`로 설정 시 영상당 ~$1.60.
+> 캐릭터 시트 초기 생성 비용은 가족유형당 3컷×5역할 ≈ $0.60 (1회성, 재사용).
 
-### 월간 비용
+### 월간 비용 (Gemini + Veo climax-only 기준)
 | 항목 | 비용 |
 |------|------|
-| 영상 30편/월 | ~$48 |
+| 영상 30편/월 | ~$60-78 |
 | ElevenLabs 구독 | $5~22/월 |
-| Replicate | 사용량 과금 |
-| **월 합계** | **~$55-70** |
+| Google GenAI | 사용량 과금 (Gemini + Veo) |
+| Replicate | 폴백용 최소 과금 |
+| **월 합계** | **~$65-100** |
 
 ## 수익 전망 (현실적 분석)
 
@@ -384,6 +399,10 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 - [x] 시니어 친화 이미지 스타일 강화 (파스텔톤, 황금빛 조명, 감성 키워드)
 - [x] Windows 환경 셋업 + 한글 경로 이슈 수정 (2026-04-22)
 - [x] 세번째 영상 제작 (2026-04-22, "부모님과 함께한 행복한 추억", $1.85)
+- [x] 이미지 엔진 전환: FLUX.1 → Nano Banana 2 (Gemini 3 Flash Image), 캐릭터 시트 도입 (2026-04-24)
+- [x] 영상 엔진 전환: Ken Burns → Veo 3.1 Fast 핵심 장면 선별 적용 (2026-04-24)
+- [x] engine_factory 도입: settings.yaml에서 엔진 선택 + 실패 시 자동 폴백 (2026-04-24)
+- [ ] parent_sacrifice 캐릭터 시트 참조 이미지 투입 + E2E 첫 실행
 - [ ] YouTube 자동 업로드 (YouTube Data API v3)
 - [ ] 매일 자동 실행 스케줄러 (cron/launchd)
 - [ ] 주제 자동 생성 (AI가 매일 새 줄거리 생성)
@@ -471,8 +490,10 @@ A) 스크립트 → B) 장면 분할 (서브씬 자동 분할, 20+ 장면)
 |------|------|
 | ElevenLabs 미설정 | Google Cloud TTS (Neural2) |
 | Google Cloud TTS 미설정 | gTTS (무료) |
-| Replicate 미설정 | Pillow placeholder 이미지 |
-| Image-to-Video | 제거됨 — Ken Burns 6방향 효과로 대체 |
+| `GOOGLE_GENAI_API_KEY` 미설정 | 이미지: FLUX.1 Pro (Replicate), 영상: Ken Burns |
+| Gemini 이미지 API 호출 실패 | FLUX.1 Pro로 자동 폴백 (engine_factory) |
+| FLUX.1/Replicate도 불가 | Pillow placeholder 이미지 |
+| Veo 영상 API 호출 실패/제외 장면 | Ken Burns 6방향 효과로 자동 대체 |
 | BGM 파일 미존재 | ffmpeg 무음 파일 |
 | 오디오 믹싱 실패 | 내레이션만 사용 |
 | 자막 번인 실패 | 자막 없이 영상 |
@@ -492,18 +513,37 @@ Windows 사용자명에 한글(`백승헌`)이 포함되어 다음 문제가 발
 
 **핵심 원칙**: Windows에서는 `tempfile` 대신 프로젝트 디렉토리 사용, 경로는 `Path.as_posix()`로 변환
 
-## 코드 변경 이력 (2026-04-22)
+## 코드 변경 이력
 
+### 2026-04-22 (G2 제거 → Ken Burns)
 | 파일 | 변경 내용 |
 |------|----------|
 | `src/orchestrator.py` | G2 스테이지 DAG에서 제거 |
 | `src/cli.py` | G2 스테이지 등록 제거 |
 | `src/project_manager.py` | ALL_STAGES에서 G2 제거 |
-| `src/pipeline/h_video_compose.py` | AI 클립 참조 제거, Ken Burns만 사용, `_extend_clip_to_duration` 삭제 |
+| `src/pipeline/h_video_compose.py` | AI 클립 참조 제거, Ken Burns만 사용 |
 | `src/pipeline/c_visual_prompt.py` | STYLE_PREFIX 시니어 친화 강화 (파스텔톤, 황금빛 조명, 감성 키워드) |
 | `src/pipeline/d_tts_gen.py` | concat 파일을 프로젝트 디렉토리에 생성, `as_posix()` 경로 |
 | `src/engines/ffmpeg_wrapper.py` | 자막 임시 파일을 video 디렉토리에 생성, forward slash 경로 |
 | `src/utils/logging_setup.py` | UTF-8 출력 래핑 (Windows 이모지 지원) |
+
+### 2026-04-24 (Gemini/Veo 엔진 전환 + 캐릭터 시트 도입)
+| 파일 | 변경 내용 |
+|------|----------|
+| `pyproject.toml` | `google-genai>=0.8` optional 의존성 추가 (`pip install -e '.[gemini]'`) |
+| `.env.example` | `GOOGLE_GENAI_API_KEY` 추가 |
+| `config/settings.yaml` | `image.engine`, `video_engine`, `character_sheet.dir` 섹션 추가 |
+| `src/models.py` | `Scene.use_ai_video`, `Scene.motion_prompt`, `ProjectManifest.character_refs` 필드 추가 |
+| `src/engines/gemini_image_client.py` (신규) | Nano Banana 2 클라이언트, multi-image(참조) 입력 지원 |
+| `src/engines/veo_video_client.py` (신규) | Veo 3.1 Fast image-to-video, 폴링 기반 |
+| `src/engines/engine_factory.py` (신규) | settings 기반 엔진 선택 + 실패 시 자동 폴백 (Gemini→FLUX, Veo→Wan/Ken Burns) |
+| `src/pipeline/c2_character_sheet.py` (신규) | `assets/character_sheets/{family_type}/{role}/` 참조 이미지로 정면/측면/전신 시트 1회 생성, manifest에 경로 기록 |
+| `src/pipeline/c_visual_prompt.py` | `use_ai_video` 플래그 설정 (감정/페이즈 매칭), 참조 이미지 일관성 지시문 |
+| `src/pipeline/g_image_gen.py` | `engine_factory.get_image_client()` + `manifest.character_refs`를 `ref_images`로 전달 |
+| `src/pipeline/g2_image_to_video.py` | Veo 클라이언트 사용, `scene.use_ai_video=True` 장면만 처리 |
+| `src/pipeline/h_video_compose.py` | `video_clips/clip_*.mp4` 존재 시 AI 클립 사용, 없으면 Ken Burns (`_prepare_ai_clip` 헬퍼 추가) |
+| `src/orchestrator.py` | `c2_character_sheet`, `g2_image_to_video` DAG 재등록 |
+| `src/cli.py`, `src/project_manager.py` | 신규 스테이지 등록, ALL_STAGES 업데이트 |
 
 ## GitHub
 

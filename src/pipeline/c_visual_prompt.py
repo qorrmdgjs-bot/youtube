@@ -48,7 +48,8 @@ VISUAL_PROMPT_TEMPLATE = """다음 장면의 visual_description을 바탕으로 
 - 부드러운 황금빛 조명과 노스탤지어 분위기
 - 색감은 채도를 낮추고 파스텔 톤으로 따뜻하게
 - 50-70세 시니어가 공감할 수 있는 한국적 정서와 풍경
-- 캐릭터 외모 설명을 반드시 포함하여 일관성 유지
+- 캐릭터 외모 설명을 반드시 포함하여 일관성 유지 (참조 이미지의 얼굴/헤어/복장 특징을 유지한다고 명시)
+- "preserve character identity from reference images" 같은 구절을 포함해 참조 이미지 일관성을 지시
 - 부정적 프롬프트 없이 긍정 묘사만
 
 JSON 형식으로 응답하세요:
@@ -60,9 +61,18 @@ CHARACTER_TEMPLATES = {
     "parent_sacrifice": {
         "father": "a Korean father born 1949, in his late 40s (1990s setting), short neat black hair with gray temples, square jaw, strong but weary eyes from years of hard work, formerly wore neat suits as a finance worker, now wears a simple worn jacket as a taxi driver, stoic but loving expression, weathered face showing sacrifice",
         "mother": "a Korean mother born 1957, in her late 30s to early 40s (1990s setting), short permed dark brown hair, warm gentle eyes, wearing a simple apron over modest clothes, slightly weathered hands from housework, kind and enduring facial expression, devoted housewife",
-        "son": "a Korean young man born 1975, teenager to early 20s (1990s setting), neat dark hair parted to the side, wearing school uniform or casual 90s Korean fashion, handsome face with emotional sensitive eyes, the middle child between two sisters",
+        "son": "a 10-year-old Korean elementary school boy (1997 IMF-era setting), short neat dark hair, round innocent face with large emotional sensitive eyes, wearing a slightly worn 90s-style quilted winter jacket over a simple shirt, traditional 1990s Korean elementary school look, thoughtful and tender expression",
         "older_sister": "a Korean young woman born early 1970s, the eldest sibling, long dark hair often tied back neatly, mature and responsible expression, wearing modest practical clothes, motherly caring demeanor toward younger siblings",
         "younger_sister": "a Korean girl born late 1970s, the youngest sibling, shoulder-length hair with bangs, bright curious eyes, playful carefree expression, wearing colorful youthful 90s Korean fashion, innocent and spirited",
+    },
+    "modern_three_gen": {
+        "grandfather": "A kind elderly Korean man in his late 70s, silver hair, gentle smile with wrinkles, wearing a brown knit vest over a grey shirt, holding a wooden cane, warm gaze",
+        "grandmother": "An elegant elderly Korean woman in her 70s, soft grey permed hair, kind and warm expression, wearing a beige trench coat and a teal silk scarf, carrying a small shopping bag",
+        "father": "A handsome and reliable Korean man in his 40s, neat dark brown hair, warm and friendly smile, wearing a dark green cable-knit sweater and a charcoal coat, carrying a leather messenger bag",
+        "mother": "A graceful Korean woman in her 40s, shoulder-length brown hair, elegant and gentle face, wearing a navy blouse and a classic beige trench coat, radiant skin",
+        "son": "A joyful 10-year-old Korean boy, short neat dark hair, bright smile, wearing a casual dark green jacket over a green hoodie and a white tee, student messenger bag slung over his shoulder, youthful energy",
+        "older_sister": "A polished 17-year-old Korean girl, neat brown bob haircut, graceful smile, wearing a tailored beige student blazer over a white blouse, compact brown crossbody bag, responsible expression",
+        "younger_sister": "A lovely 5-year-old Korean preschool girl, long wavy hair tied with ribbons, bright and innocent smile, wearing a soft cream knit cardigan over a delicate floral dress, holding a small bouquet of wildflowers",
     },
     "default": {
         "mother": "a Korean mother in her 50s, short permed dark brown hair, warm gentle eyes, wearing modest traditional clothes",
@@ -146,6 +156,28 @@ class VisualPromptStage(BaseStage):
                 scene=scene.index,
                 prompt_len=len(scene.visual_prompt),
             )
+
+        # Flag key scenes for AI video generation (G2 stage)
+        video_cfg = settings.get("video_engine", {})
+        ai_emotions = {e.lower() for e in video_cfg.get("ai_video_emotions", [])}
+        ai_phases = {p.lower() for p in video_cfg.get("ai_video_phases", [])}
+        engine_mode = video_cfg.get("engine", "ken_burns")
+        if engine_mode == "veo_all":
+            for scene in script.scenes:
+                scene.use_ai_video = True
+        elif engine_mode == "veo_selective":
+            for scene in script.scenes:
+                emotion_hit = (scene.emotion or "").lower() in ai_emotions
+                phase_hit = (scene.phase or "").lower() in ai_phases
+                scene.use_ai_video = emotion_hit or phase_hit
+
+        ai_count = sum(1 for s in script.scenes if s.use_ai_video)
+        self.log.info(
+            "ai_video_scenes_flagged",
+            engine=engine_mode,
+            count=ai_count,
+            total=len(script.scenes),
+        )
 
         # Save updated script
         (project_dir / "script.json").write_text(

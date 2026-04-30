@@ -16,12 +16,20 @@ STAGE_DEPS: dict[str, list[str]] = {
     "a_script_gen": [],
     "b_scene_segment": ["a_script_gen"],
     "c_visual_prompt": ["b_scene_segment"],
+    "c2_character_sheet": ["b_scene_segment"],
     "d_tts_gen": ["b_scene_segment"],
     "e_bgm_select": ["b_scene_segment"],
     "f_subtitle_split": ["b_scene_segment"],
-    "g_image_gen": ["c_visual_prompt"],
-    # g2_image_to_video 제거 — Ken Burns 효과로 대체 (비용 절감)
-    "h_video_compose": ["d_tts_gen", "e_bgm_select", "f_subtitle_split", "g_image_gen"],
+    "g_image_gen": ["c_visual_prompt", "c2_character_sheet"],
+    # g2_image_to_video 재활성화 — Veo 3.1 핵심 장면만, Ken Burns 혼합 (2026-04-24)
+    "g2_image_to_video": ["g_image_gen"],
+    "h_video_compose": [
+        "d_tts_gen",
+        "e_bgm_select",
+        "f_subtitle_split",
+        "g_image_gen",
+        "g2_image_to_video",
+    ],
     "i_thumbnail_gen": ["h_video_compose"],
     "j_metadata_gen": ["h_video_compose"],
     "k_monetization_desc": ["h_video_compose"],

@@ -21,7 +21,12 @@ audio:
   fade_in_sec: 1.5
   fade_out_sec: 3.0
 
-# Subtitle
+# BGM 사용 여부. 유튜브 업로드 시 유튜브 오디오 라이브러리를 쓸 거면 false.
+# true로 바꾸면 e_bgm_select가 assets/bgm/의 파일로 BGM 트랙을 합성함.
+bgm:
+  enabled: false
+
+# Subtitle (main video 1920x1080)
 subtitle:
   font: "NanumSquareRoundEB"
   font_size: 22
@@ -32,6 +37,16 @@ subtitle:
   position_y_percent: 85  # bottom 15%
   max_chars_per_line: 18
   max_syllables_per_sec: 3.5
+
+# Subtitle for Shorts (9:16, 1080x1920 — narrower frame)
+subtitle_shorts:
+  font: "NanumSquareRoundEB"
+  font_size: 11                 # 본편 22px의 절반 (쇼츠 크롭 후 과대 확대 방지)
+  font_color: "white"
+  outline_color: "black"
+  outline_width: 2
+  shadow_offset: 1
+  max_chars_per_line: 14
 
 # Scene
 scene:
@@ -70,8 +85,30 @@ tts:
 
 # Image generation
 image:
-  provider: "replicate"
+  engine: "gemini"              # "gemini" (Nano Banana 2) | "flux" (FLUX.1 Pro 폴백)
+  provider: "replicate"         # FLUX용 공급자 (폴백 경로)
   model: "black-forest-labs/flux-1.1-pro"
+  gemini_model: "gemini-3.1-flash-image-preview"
   width: 1920
   height: 1080
   num_images_per_scene: 1
+
+# Video generation (image-to-video)
+video_engine:
+  engine: "veo_selective"       # "veo_selective" (핵심 장면만) | "veo_all" | "ken_burns"
+  veo_model: "veo-3.1-fast-generate-preview"
+  veo_duration_sec: 6
+  veo_generate_audio: false
+  # 감정/페이즈 태그가 이 목록에 포함된 장면만 AI 영상화 (veo_selective 모드)
+  # 2026-04-24 축소: climax 한 포인트만 Veo 적용 (비용 절감)
+  ai_video_emotions:
+    - "climax"
+  ai_video_phases:
+    - "climax"
+
+# Character sheet
+character_sheet:
+  dir: "assets/character_sheets"
+  # false(기본) = ref_*.png을 그대로 참조 이미지로 사용
+  # true      = C2 스테이지가 ref_*.png으로부터 sheet_front/profile/fullbody 3뷰 추가 생성
+  generate_sheets: false

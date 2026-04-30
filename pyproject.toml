@@ -29,6 +29,9 @@ tts = [
 image = [
     "replicate>=0.25",
 ]
+gemini = [
+    "google-genai>=0.8",
+]
 whisper = [
     "openai-whisper>=20231117",
 ]

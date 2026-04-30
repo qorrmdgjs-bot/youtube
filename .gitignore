@@ -38,6 +38,7 @@ assets/bgm/*.wav
 assets/sfx/*.mp3
 assets/sfx/*.wav
 assets/overlays/*.png
+# character_sheets/는 git에 포함 — 얼굴 일관성을 위해 팀/기기 간 동기화 필요
 
 # Batch state
 batch/queue.json
