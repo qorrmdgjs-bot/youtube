@@ -251,8 +251,17 @@ class ShortsTeaserStage(BaseStage):
         # Build subtitle filter as a separate chain via [in][out] labels, so the
         # commas inside force_style do not collide with the outer comma-joined chain.
         crop_scale = "crop=ih*9/16:ih,scale=1080:1920"
+
+        # All three files live in <project>/video/ — chdir there and use bare basenames
+        # to bypass Windows' Korean-path + spaces + drive-letter colon issues that
+        # break ffmpeg's subtitles filter on absolute paths.
+        video_dir = output.parent
+        source_arg = source.name if source.parent == video_dir else str(source.resolve())
+        output_arg = output.name
+        cwd_arg: Path | None = video_dir
+
         if srt_path is not None and srt_path.exists():
-            srt_for_ff = srt_path.resolve().as_posix()
+            srt_for_ff = srt_path.name if srt_path.parent == video_dir else srt_path.resolve().as_posix().replace(":", r"\:")
             # libass force_style uses commas; ffmpeg's filter parser also uses commas to
             # separate filters, so backslash-escape every comma inside the style value.
             style_pairs = [
@@ -279,7 +288,7 @@ class ShortsTeaserStage(BaseStage):
             [
                 "ffmpeg", "-y",
                 "-ss", str(start_sec),
-                "-i", str(source),
+                "-i", source_arg,
                 "-t", str(duration),
                 "-vf", vf,
                 "-c:v", "libx264",
@@ -291,8 +300,9 @@ class ShortsTeaserStage(BaseStage):
                 "-ar", "44100",
                 "-ac", "2",
                 "-movflags", "+faststart",
-                str(output),
+                output_arg,
             ],
+            cwd=str(cwd_arg),
             capture_output=True,
             check=True,
         )
