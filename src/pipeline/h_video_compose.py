@@ -67,32 +67,49 @@ class VideoComposeStage(BaseStage):
         scenes_dir = project_dir / "scenes"
 
         # Step 1: Create video clips from images using Ken Burns effect.
-        # Use ACTUAL TTS audio durations (per-scene mp3) rather than planned scene.duration_sec
-        # so the picture and narration stay in sync (LLM duration estimates are unreliable).
+        # Sub-scenes that share an image_key (split from the same parent LLM scene)
+        # are merged into ONE long Ken Burns clip so the camera stays continuous on
+        # the same image instead of cutting to different angles. Per-scene audio
+        # durations are summed (with inter-scene silence gaps) to compute total span.
         self.log.info("step_video_clips_start")
         scene_clips: list[Path] = []
         audio_dir = project_dir / "audio"
         n_scenes = len(script.scenes)
 
+        # Pass 1: collect per-scene audio durations and inter-scene gaps
+        scene_durations: list[tuple[float, float]] = []  # (audio_dur, trailing_gap)
         for i, scene in enumerate(script.scenes):
-            # Image is shared across all sub-scenes that have the same image_key,
-            # so look it up by the group key. Audio + clip stay per-scene.
-            image_key = scene.image_key if scene.image_key is not None else scene.index
-            image_path = scenes_dir / f"scene_{image_key:03d}.png"
-            clip_path = video_dir / f"clip_{scene.index:03d}.mp4"
             audio_path = audio_dir / f"scene_{scene.index:03d}.mp3"
-
-            # Per-scene audio duration (already includes silence_before for climax)
             actual_audio_dur = _ffprobe_duration(audio_path) if audio_path.exists() else 0.0
             if actual_audio_dur <= 0:
-                # Fallback when audio missing — use planned values
                 actual_audio_dur = scene.duration_sec
                 if scene.has_silence_before:
                     actual_audio_dur += scene.silence_duration_sec
+            trailing_gap = INTER_SCENE_GAP_SEC if i < n_scenes - 1 else 0.0
+            scene_durations.append((actual_audio_dur, trailing_gap))
 
-            # Hold the same image during the inter-scene silence (every clip but the last)
-            inter_gap = INTER_SCENE_GAP_SEC if i < n_scenes - 1 else 0.0
-            total_duration = actual_audio_dur + inter_gap
+        # Pass 2: group consecutive scenes by image_key (sub-scenes share image_key)
+        groups: list[dict] = []
+        for i, scene in enumerate(script.scenes):
+            key = scene.image_key if scene.image_key is not None else scene.index
+            audio_dur, trailing_gap = scene_durations[i]
+            if groups and groups[-1]["image_key"] == key:
+                groups[-1]["audio_dur"] += audio_dur + trailing_gap
+                groups[-1]["sub_count"] += 1
+            else:
+                groups.append({
+                    "image_key": key,
+                    "first_scene_index": scene.index,
+                    "audio_dur": audio_dur + trailing_gap,
+                    "sub_count": 1,
+                })
+
+        # Pass 3: one Ken Burns clip per group — same image, single continuous camera move
+        for g_idx, group in enumerate(groups):
+            image_key = group["image_key"]
+            image_path = scenes_dir / f"scene_{image_key:03d}.png"
+            clip_path = video_dir / f"clip_group_{image_key:03d}.mp4"
+            total_duration = group["audio_dur"]
 
             if image_path.exists():
                 ken_burns_scene(
@@ -102,18 +119,18 @@ class VideoComposeStage(BaseStage):
                     fps=video_config.get("fps", 24),
                     zoom_speed=scene_config.get("ken_burns_zoom_speed", 0.0005),
                     max_zoom=scene_config.get("ken_burns_max_zoom", 1.3),
-                    scene_index=scene.index,
+                    scene_index=group["first_scene_index"],
                 )
                 self.log.info(
-                    "ken_burns_applied",
-                    scene=scene.index,
-                    audio_dur=round(actual_audio_dur, 2),
-                    inter_gap=inter_gap,
-                    total=round(total_duration, 2),
+                    "ken_burns_group_applied",
+                    group_idx=g_idx,
+                    image_key=image_key,
+                    sub_scenes=group["sub_count"],
+                    duration=round(total_duration, 2),
                 )
                 scene_clips.append(clip_path)
             else:
-                self.log.warning("no_visual_source", scene=scene.index)
+                self.log.warning("no_visual_source", image_key=image_key)
                 continue
 
         if not scene_clips:
