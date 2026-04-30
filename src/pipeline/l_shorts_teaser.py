@@ -21,6 +21,7 @@ import yaml
 from src.engines.llm_client import PROJECT_ROOT
 from src.models import ProjectManifest, Scene, Script
 from src.pipeline.base_stage import BaseStage
+from src.pipeline.video_paths import resolve_video_dir
 
 
 class ShortsTeaserStage(BaseStage):
@@ -46,13 +47,16 @@ class ShortsTeaserStage(BaseStage):
         font_name = subtitle_cfg.get("font", "NanumSquareRoundEB")
         source_name = shorts_cfg.get("source_video", "composed.mp4")
 
+        video_dir = resolve_video_dir(project_dir, manifest)
+        video_dir.mkdir(parents=True, exist_ok=True)
+
         # Pick source: prefer pre-subtitle composed.mp4 (clean), fall back to final.mp4
-        candidate = project_dir / "video" / source_name
+        candidate = video_dir / source_name
         if candidate.exists():
             source_video = candidate
             burn_fresh_subs = True
         else:
-            source_video = project_dir / "video" / "final.mp4"
+            source_video = video_dir / "final.mp4"
             burn_fresh_subs = False
             self.log.warning("composed_mp4_missing_falling_back_to_final_with_subs")
 
@@ -77,12 +81,12 @@ class ShortsTeaserStage(BaseStage):
         created: list[dict] = []
 
         for i, clip in enumerate(clips):
-            output_path = project_dir / "video" / f"shorts_{i + 1:02d}.mp4"
+            output_path = video_dir / f"shorts_{i + 1:02d}.mp4"
 
             # Per-short SRT (time-shifted) when we're re-burning subs
             short_srt: Path | None = None
             if burn_fresh_subs and srt_path.exists():
-                short_srt = project_dir / "video" / f"shorts_{i + 1:02d}.srt"
+                short_srt = video_dir / f"shorts_{i + 1:02d}.srt"
                 self._slice_srt(
                     src=srt_path,
                     dst=short_srt,
@@ -131,12 +135,12 @@ class ShortsTeaserStage(BaseStage):
         # Main teaser = first successful short
         if created:
             import shutil
-            main_teaser = project_dir / "video" / "shorts_teaser.mp4"
-            first_short = project_dir / "video" / created[0]["file"]
+            main_teaser = video_dir / "shorts_teaser.mp4"
+            first_short = video_dir / created[0]["file"]
             if first_short.exists():
                 shutil.copy2(first_short, main_teaser)
 
-        (project_dir / "video" / "shorts_manifest.json").write_text(
+        (video_dir / "shorts_manifest.json").write_text(
             json.dumps(created, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )

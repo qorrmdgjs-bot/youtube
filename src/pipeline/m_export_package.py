@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src.models import ExportManifest, ProjectManifest, VideoMetadata
 from src.pipeline.base_stage import BaseStage
+from src.pipeline.video_paths import resolve_video_dir
 
 
 class ExportPackageStage(BaseStage):
@@ -17,12 +18,14 @@ class ExportPackageStage(BaseStage):
         export_dir = project_dir / "export"
         export_dir.mkdir(exist_ok=True)
 
+        video_dir = resolve_video_dir(project_dir, manifest)
+
         # Validate required files
-        video_path = project_dir / "video" / "final.mp4"
+        video_path = video_dir / "final.mp4"
         thumb_path = project_dir / "thumbnail" / "thumb_1080.png"
         metadata_path = export_dir / "metadata.json"
         description_path = export_dir / "description.txt"
-        shorts_path = project_dir / "video" / "shorts_teaser.mp4"
+        shorts_path = video_dir / "shorts_teaser.mp4"
 
         errors: list[str] = []
         if not video_path.exists():
@@ -66,6 +69,17 @@ class ExportPackageStage(BaseStage):
         (export_dir / "upload_manifest.json").write_text(
             export_manifest.model_dump_json(indent=2, ensure_ascii=False),
             encoding="utf-8",
+        )
+
+        # 메모장용 업로드 텍스트 — 영상 폴더에 함께 두어 업로드 시 복붙
+        # UTF-8 BOM(utf-8-sig)을 써야 윈도우 메모장이 한글을 깨지 않게 연다.
+        upload_txt = video_dir / "유튜브_업로드.txt"
+        tags_line = ", ".join(metadata.tags) if metadata.tags else ""
+        upload_txt.write_text(
+            f"[제목]\n{metadata.title}\n\n"
+            f"[태그]\n{tags_line}\n\n"
+            f"[설명]\n{full_description}\n",
+            encoding="utf-8-sig",
         )
 
         # Print summary

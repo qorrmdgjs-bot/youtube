@@ -21,6 +21,7 @@ from src.engines.ffmpeg_wrapper import (
 from src.engines.llm_client import PROJECT_ROOT
 from src.models import ProjectManifest, Script
 from src.pipeline.base_stage import BaseStage
+from src.pipeline.video_paths import resolve_video_dir
 
 
 # 0.8s inter-scene silence is added by d_tts_gen between every adjacent pair of scene mp3s.
@@ -62,8 +63,8 @@ class VideoComposeStage(BaseStage):
         video_config = settings.get("video", {})
         subtitle_cfg = settings.get("subtitle", {})
 
-        video_dir = project_dir / "video"
-        video_dir.mkdir(exist_ok=True)
+        video_dir = resolve_video_dir(project_dir, manifest)
+        video_dir.mkdir(parents=True, exist_ok=True)
         scenes_dir = project_dir / "scenes"
 
         # Step 1: Create video clips from images using Ken Burns effect.
